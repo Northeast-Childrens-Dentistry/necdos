@@ -4,13 +4,6 @@ on:
   pull_request:
     branches:
       - main
-  schedule:
-    - cron: '05 10 * * *'  # 10:05am UTC everyday
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - '**/README.md'
   workflow_dispatch:
 
 env:
@@ -31,6 +24,16 @@ jobs:
       id-token: write
 
     steps:
+      - name: Require signing configuration before publication
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        env:
+          SIGNING_SECRET_PRESENT: ${{ secrets.SIGNING_SECRET != '' }}
+        run: |
+          if [[ "${SIGNING_SECRET_PRESENT}" != "true" ]]; then
+            echo "::error::Configure SIGNING_SECRET and reviewed client trust policy before publishing any NECD candidate."
+            exit 1
+          fi
+
       # These stage versions are pinned by https://github.com/renovatebot/renovate
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -161,4 +164,3 @@ jobs:
           # https://github.com/coreos/rpm-ostree/issues/5509
           # use old bundle format, so we can use newer cosign 3.X.X instead of 2.X.X
           cosign sign -y --new-bundle-format=false --use-signing-config=false --key env://COSIGN_PRIVATE_KEY ${IMAGE_REGISTRY}/${IMAGE_NAME}@${DIGEST}
-

@@ -115,7 +115,7 @@ build $target_image=image_name $tag=default_tag:
     LABELS+=("--label" "io.artifacthub.package.keywords={{ image_keywords }}")
     LABELS+=("--label" "io.artifacthub.package.license=Apache-2.0")
     LABELS+=("--label" "io.artifacthub.package.logo-url={{ image_logo_url }}")
-    LABELS+=("--label" "io.artifacthub.package.prerelease=false")
+    LABELS+=("--label" "io.artifacthub.package.prerelease=true")
     LABELS+=("--label" "org.opencontainers.image.created=$(date -u +%Y\-%m\-%d\T%H\:%M\:%S\Z)")
     LABELS+=("--label" "org.opencontainers.image.description={{ image_desc }}")
     LABELS+=("--label" "org.opencontainers.image.title={{ image_name }}")

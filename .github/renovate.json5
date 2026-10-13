@@ -15,7 +15,7 @@
     // from being pinned as it serves no purpose there
     {
       "matchDatasources": ["docker"],
-      "matchPackageNames": ["ghcr.io/ublue-os/bazzite"],
+      "matchPackageNames": ["ghcr.io/ublue-os/aurora"],
       "pinDigests": false
     },
     {

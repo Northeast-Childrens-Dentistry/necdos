@@ -25,9 +25,9 @@ The planned pipeline checks upstream stable image digests daily, rebuilds on bas
 
 `ujust kevcops` will apply the current trusted personal configuration: Aurora developer tools, figma-linux-next, NordVPN and MeshLab Flatpak. The entry point should obtain a verified versioned setup without waiting for an OS rebuild for every personal change.
 
-`ujust removekevcops` will reverse command-owned installations and settings using a persistent ledger, preserving preexisting resources, projects and personal settings/data. Shutdown/restart should run the same cleanup backend so the next boot is clean. Interrupted cleanup requires startup recovery.
+`ujust removekevcops` will reverse command-owned installations and settings using a persistent ledger, preserving preexisting resources, projects and personal settings/data. Removal is run manually; there is no automatic cleanup on shutdown.
 
-Full DX and host VPN integration may require deployment/reboot transitions. Resolve these in issues #9–11 before promising immediate toggles or unconditional cleanup after power loss. Shared fonts/apps remain after personal cleanup.
+Full DX and host VPN integration may require deployment/reboot transitions. Resolve these in issues #9–10 before promising immediate toggles. Shared fonts/apps remain after personal cleanup.
 
 ## Incremental roadmap
 
@@ -43,7 +43,6 @@ Full DX and host VPN integration may require deployment/reboot transitions. Reso
 | 08 — Port and validate Bazzite Waydroid integration | [#8](https://github.com/Northeast-Childrens-Dentistry/necdos/issues/8) |
 | 09 — Prototype reversible Aurora developer tooling | [#9](https://github.com/Northeast-Childrens-Dentistry/necdos/issues/9) |
 | 10 — Implement living ujust kevcops and removekevcops | [#10](https://github.com/Northeast-Childrens-Dentistry/necdos/issues/10) |
-| 10a — Clean personal setup on shutdown; recover interrupted cleanup | [#11](https://github.com/Northeast-Childrens-Dentistry/necdos/issues/11) |
 | 10b — Add shared Windows/NECD fonts and Apple emoji default | [#12](https://github.com/Northeast-Childrens-Dentistry/necdos/issues/12) |
 | 11 — Pilot installation, clinical workflows, updates and rollback | [#13](https://github.com/Northeast-Childrens-Dentistry/necdos/issues/13) |
 | 12 — Roll out NECD OS and isolate future CarestackOS profile | [#14](https://github.com/Northeast-Childrens-Dentistry/necdos/issues/14) |

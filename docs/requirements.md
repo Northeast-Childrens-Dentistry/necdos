@@ -1,4 +1,4 @@
-# NECD OS requirements — v0.2
+# NECD OS requirements — v0.3
 
 Recorded October 13, 2026. Implements the planning portion of [issue #1](https://github.com/Northeast-Childrens-Dentistry/necdos/issues/1). This document is a requirements manifest, not an installer or proof of compatibility.
 
@@ -47,11 +47,9 @@ Current upstream DX capability inventory to verify in #9: VS Code/devcontainers,
 2. Report the applied revision and retain the last working offline copy. Validate updates before executing them. Interrupted runs are recoverable and repeated invocations are harmless.
 3. Maintain a persistent ledger of installations and changed settings, including what existed before activation. Reconcile additions/removals across revisions; use the installed ledger during removal even if a new script drops old items.
 4. ujust removekevcops reverses command-owned installations and settings, preserving preexisting resources, projects, personal app settings and authentication data by default. This is an installation cleanup, not a user-data wipe.
-5. Poweroff/restart automatically runs the same removal backend. Suspend/hibernate do not trigger cleanup. The next normal boot should be clean NECD OS, and personal apps are not automatically reinstalled until kevcops is invoked again.
-6. Use bounded noninteractive shutdown cleanup with correct service/filesystem ordering and a persistent pending marker. Recover incomplete cleanup at startup after forced shutdown or power loss.
-7. Full DX image changes and host VPN packages may require reboot/deployment transitions. Resolve activation/removal behavior before promising same-session full-DX toggles or an unconditional clean boot after every power failure.
+5. Removal runs only when Kevin invokes ujust removekevcops; nothing runs automatically at shutdown or boot. Full DX image changes and host VPN packages may require a reboot to complete activation or removal; document which steps need one.
 
-Implementation owners: #9 (developer architecture), #10 (living install/removal), #11 (shutdown/recovery). Shared apps, fonts and Waydroid survive personal cleanup.
+Implementation owners: #9 (developer architecture), #10 (living install/removal). Automatic shutdown cleanup was dropped on October 13, 2026 (#11 closed); removal is manual only. Shared apps, fonts and Waydroid survive personal cleanup.
 
 ## Update and deployment requirements
 
@@ -99,7 +97,7 @@ On Windows, open System Information with Win+R → msinfo32 to find System Manuf
 - [ ] Validate Ethernet/Wi-Fi, audio, camera and every required peripheral.
 - [ ] Test CareStack/Iris authentication, printing, downloads and normal browser workload.
 - [ ] Test Waydroid startup/network/graphics and RAM pressure.
-- [ ] Exercise kevcops activation, removal, normal shutdown cleanup and interrupted-cleanup recovery.
+- [ ] Exercise kevcops activation, repeat activation and manual removal.
 - [ ] Measure usability with personal developer/Figma/MeshLab workloads; document limits.
 - [ ] Verify signed update, reboot and rollback.
 

@@ -1,27 +1,19 @@
 #!/bin/bash
 
-set -ouex pipefail
+set -euo pipefail
 
-# Copy the contents of system_files/ of the git repo to /
-cp -avf "/ctx/system_files"/. /
+# Add only NECD identity in this foundation; preserve Aurora packages/services.
+cp -avf /ctx/system_files/. /
+install -d -m 0755 /usr/share/necdos
+cat > /usr/share/necdos/release.json <<'JSON'
+{
+  "name": "NECD OS",
+  "stage": "foundation",
+  "base": "ghcr.io/ublue-os/aurora:stable",
+  "ready_for_practice": false,
+  "requirements": "https://github.com/Northeast-Childrens-Dentistry/necdos/blob/main/docs/requirements.md"
+}
+JSON
+chmod 0644 /usr/share/necdos/release.json
 
-### Install packages
-
-# Packages can be installed from any enabled yum repo on the image.
-# RPMfusion repos are available by default in ublue main images
-# List of rpmfusion packages can be found here:
-# https://mirrors.rpmfusion.org/mirrorlist?path=free/fedora/updates/43/x86_64/repoview/index.html&protocol=https&redirect=1
-
-# this installs a package from fedora repos
-dnf5 install -y tmux
-
-# Use a COPR Example:
-#
-# dnf5 -y copr enable ublue-os/staging
-# dnf5 -y install package
-# Disable COPRs so they don't end up enabled on the final image:
-# dnf5 -y copr disable ublue-os/staging
-
-#### Example for enabling a System Unit File
-
-systemctl enable podman.socket
+# Approved app provisioning, fonts and personal setup are subsequent tasks.

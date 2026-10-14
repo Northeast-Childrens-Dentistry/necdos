@@ -35,7 +35,8 @@ for f in krita zoom brave firefox; do
     grep -q '^\[Flatpak Preinstall ' "/usr/share/flatpak/preinstall.d/$f.preinstall" || fail "$f.preinstall"
 done
 [[ -x /usr/lib/opt/google/chrome/google-chrome ]] || fail "chrome binary"
-[[ -e /usr/bin/google-chrome ]] || fail "/usr/bin/google-chrome"
+# Dangling until boot: the target is /opt/google (tmpfiles relinks it), so test the link, not what it points to.
+[[ -L /usr/bin/google-chrome ]] || fail "/usr/bin/google-chrome"
 [[ -f /usr/share/applications/google-chrome.desktop ]] || fail "chrome desktop file"
 ls /usr/share/icons/hicolor/*/apps/google-chrome.png >/dev/null 2>&1 || fail "chrome icon"
 grep -q '^L+ /var/opt/google ' /usr/lib/tmpfiles.d/necdos-google-chrome.conf || fail "tmpfiles snippet"

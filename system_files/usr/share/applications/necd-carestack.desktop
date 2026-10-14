@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=CareStack
+Comment=CareStack in its own window
+Exec=/usr/bin/google-chrome --app=https://necdsa.carestack.com
+Icon=necd-carestack
+Terminal=false
+Categories=Office;
+StartupNotify=true
+StartupWMClass=chrome-necdsa.carestack.com__-Default

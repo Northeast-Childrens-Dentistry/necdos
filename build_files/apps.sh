@@ -25,7 +25,7 @@ rm -rf /usr/lib/opt/google
 mv "$(realpath /opt)/google" /usr/lib/opt/google
 
 # --- Default browser for new users (Aurora pattern: system-wide mimeapps.list) ---
-for t in x-scheme-handler/http x-scheme-handler/https text/html; do
+for t in x-scheme-handler/http x-scheme-handler/https text/html application/xhtml+xml; do
     XDG_CONFIG_HOME=/usr/share/applications xdg-mime default google-chrome.desktop "$t"
 done
 
@@ -44,3 +44,11 @@ grep -q '^L+ /var/opt/google ' /usr/lib/tmpfiles.d/necdos-google-chrome.conf || 
 for t in http https; do
     grep -qx "x-scheme-handler/$t=google-chrome.desktop" /usr/share/applications/mimeapps.list || fail "default browser $t"
 done
+
+# Taskbar and launchers for the practice apps.
+for f in /usr/share/applications/necd-carestack.desktop /usr/share/applications/necd-iris.desktop \
+         /usr/share/icons/hicolor/64x64/apps/necd-carestack.png /usr/share/icons/hicolor/64x64/apps/necd-iris.png; do
+    [[ -s "$f" ]] || fail "$f"
+done
+grep -q 'applications:necd-carestack.desktop' /usr/share/plasma/look-and-feel/dev.getaurora.aurora.desktop/contents/layouts/org.kde.plasma.desktop-layout.js || fail "taskbar layout"
+grep -qx 'BrowserApplication=google-chrome.desktop' /etc/xdg/kdeglobals || fail "BrowserApplication"

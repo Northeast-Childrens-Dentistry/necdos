@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Iris
+Comment=Iris in its own window
+Exec=/usr/bin/google-chrome --app=https://iris-mw.carestack.com/
+Icon=necd-iris
+Terminal=false
+Categories=Office;
+StartupNotify=true
+StartupWMClass=chrome-iris-mw.carestack.com__-Default

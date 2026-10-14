@@ -1,0 +1,3 @@
+docker:
+  ghcr.io/northeast-childrens-dentistry/necdos:
+    use-sigstore-attachments: true

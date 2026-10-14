@@ -1,0 +1,12 @@
+{
+  "KPlugin": {
+    "Authors": [
+      {
+        "Name": "Northeast Children's Dentistry"
+      }
+    ],
+    "Id": "NECD-Super-Kid",
+    "Name": "NECD Super Kid",
+    "License": "Proprietary, all rights reserved"
+  }
+}

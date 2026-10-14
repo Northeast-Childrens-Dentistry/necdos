@@ -4,33 +4,51 @@ on:
   pull_request:
     branches:
       - main
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
   workflow_dispatch:
+    inputs:
+      force_fail:
+        description: "Fail the verify job on purpose (proves stable does not move)"
+        type: boolean
+        default: false
 
 env:
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"  # do not edit
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}-${{ inputs.brand_name}}-${{ inputs.stream_name }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # main runs queue instead of cancelling, so promotions never overlap or run out of order.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build_push:
     name: Build and push image
     runs-on: ubuntu-26.04
+    # PRs get no environment, so they can never read the signing key.
+    environment: ${{ github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' && 'release' || 'candidate') || '' }}
 
     permissions:
       contents: read
       packages: write
       id-token: write
 
+    outputs:
+      image: ${{ steps.push-image.outputs.image }}
+      digest: ${{ steps.push-image.outputs.digest }}
+
     steps:
       - name: Require signing configuration before publication
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        if: github.event_name != 'pull_request'
         env:
           SIGNING_SECRET_PRESENT: ${{ secrets.SIGNING_SECRET != '' }}
         run: |
           if [[ "${SIGNING_SECRET_PRESENT}" != "true" ]]; then
-            echo "::error::Configure SIGNING_SECRET and reviewed client trust policy before publishing any NECD candidate."
+            echo "::error::Configure SIGNING_SECRET in the release and candidate environments before publishing."
             exit 1
           fi
 
@@ -56,12 +74,11 @@ jobs:
 
           echo "IMAGE_NAME=${IMAGE_NAME}" >> $GITHUB_ENV
 
-      - name: Default Tag
-        id: gen-default-tag
+      - name: Channel
         run: |
-          DEFAULT_TAG=$(just generate-default-tag)
-
-          echo "DEFAULT_TAG=${DEFAULT_TAG}" >> $GITHUB_ENV
+          # main becomes testing (promoted to stable after checks); every other ref is feature work.
+          if [[ "${GITHUB_REF}" == refs/heads/main ]]; then TAG=testing; else TAG=candidate; fi
+          echo "DEFAULT_TAG=${TAG}" >> "$GITHUB_ENV"
 
       - name: Prepare environment
         run: |
@@ -116,55 +133,180 @@ jobs:
             "${DEFAULT_TAG}" \
             "${ALIAS_TAGS}"
 
-      # These `if` statements are so that pull requests for your custom images do not make it publish any packages under your name without you knowing
-      # They also check if the runner is on the default branch so that things like the merge queue (if you enable it), are going to work
+      # Pull requests never log in, push or sign.
       - name: Login to GitHub Container Registry
         uses: docker/login-action@abd2ef45e78c5afb21d64d4ca52ee8550d9572c7 # v4.5.1
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        if: github.event_name != 'pull_request'
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push To GHCR
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        if: github.event_name != 'pull_request'
         id: push-image
         env:
           ALIAS_TAGS: ${{ steps.gen-build-tags.outputs.alias_tags }}
         run: |
           set -euox pipefail
-          : > /tmp/digests
-          for tag in ${ALIAS_TAGS}; do
-            podman push --digestfile=/tmp/digestfile ${IMAGE_NAME}:${tag} ${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}
-            cat /tmp/digestfile >> /tmp/digests; echo >> /tmp/digests
-          done
+          # Push once to the unique <tag>-<sha> tag; nobody tracks it, so it is safe before signing.
+          set -- ${ALIAS_TAGS}
+          podman push --digestfile=/tmp/digest "${IMAGE_NAME}:$1" "${IMAGE_REGISTRY}/${IMAGE_NAME}:$1"
+          echo "digest=$(cat /tmp/digest)" >> "$GITHUB_OUTPUT"
+          echo "image=${IMAGE_REGISTRY}/${IMAGE_NAME}" >> "$GITHUB_OUTPUT"
 
-          # Tags can resolve to different digests; every one must be signed.
-          echo "digests=$(sort -u /tmp/digests | grep . | tr '\n' ' ')" >> $GITHUB_OUTPUT
-
-      # This section is optional and only needs to be enabled if you plan on distributing
-      # your project for others to consume. You will need to create a public and private key
-      # using Cosign and save the private key as a repository secret in Github for this workflow
-      # to consume. For more details, review the image signing section of the README.
       - name: Install Cosign
         uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        if: github.event_name != 'pull_request'
         with:
           # be careful when upgrading major versions
           cosign-release: 'v3.1.2'
 
       - name: Sign container image
-        id: sign-image
-        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        if: github.event_name != 'pull_request'
         env:
           COSIGN_EXPERIMENTAL: false
           COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
-          DIGESTS: ${{ steps.push-image.outputs.digests }}
+          DIGEST: ${{ steps.push-image.outputs.digest }}
         run: |
           # https://github.com/containers/container-libs/issues/388
           # https://github.com/coreos/rpm-ostree/issues/5509
           # use old bundle format, so we can use newer cosign 3.X.X instead of 2.X.X
-          for DIGEST in ${DIGESTS}; do
-            cosign sign -y --new-bundle-format=false --use-signing-config=false --key env://COSIGN_PRIVATE_KEY ${IMAGE_REGISTRY}/${IMAGE_NAME}@${DIGEST}
+          cosign sign -y --new-bundle-format=false --use-signing-config=false --key env://COSIGN_PRIVATE_KEY ${IMAGE_REGISTRY}/${IMAGE_NAME}@${DIGEST}
+
+      - name: Add remaining tags to the signed digest
+        if: github.event_name != 'pull_request'
+        env:
+          ALIAS_TAGS: ${{ steps.gen-build-tags.outputs.alias_tags }}
+          DIGEST: ${{ steps.push-image.outputs.digest }}
+        run: |
+          set -euox pipefail
+          command -v skopeo || { sudo apt-get update && sudo apt-get install -y skopeo; }
+          set -- ${ALIAS_TAGS}; shift
+          for tag in "$@"; do
+            skopeo copy --all --preserve-digests "docker://${IMAGE_REGISTRY}/${IMAGE_NAME}@${DIGEST}" "docker://${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}"
           done
+
+  verify:
+    name: Verify signature and boot
+    needs: build_push
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+    env:
+      IMAGE_REF: ${{ needs.build_push.outputs.image }}@${{ needs.build_push.outputs.digest }}
+    steps:
+      - name: Force failure
+        if: inputs.force_fail
+        run: |
+          echo "::error::force_fail was set: stopping before promotion on purpose."
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Maximize build space
+        uses: ublue-os/remove-unwanted-software@695eb75bc387dbcd9685a8e72d23439d8686cba6
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+        with:
+          cosign-release: 'v3.1.2'
+
+      # No registry login: this also proves anonymous clients can pull and verify.
+      - name: Verify signature
+        run: cosign verify --key cosign.pub --new-bundle-format=false "${IMAGE_REF}"
+
+      - name: Runner user ids
+        run: echo "USER_IDS=$(id -u):$(id -g)" >> "$GITHUB_ENV"
+
+      - name: Build qcow2
+        id: bib
+        uses: osbuild/bootc-image-builder-action@8661cd3832544ad68c12dcde8681b13ab0f56a8d # main
+        with:
+          builder-image: quay.io/centos-bootc/bootc-image-builder:latest
+          config-file: ./disk_config/ci-boot.toml
+          image: ${{ env.IMAGE_REF }}
+          chown: ${{ env.USER_IDS }}
+          types: qcow2
+          additional-args: --use-librepo=True
+
+      - name: Boot in QEMU
+        env:
+          DISK: ${{ steps.bib.outputs.output-directory }}/qcow2/disk.qcow2
+        run: |
+          set -euo pipefail
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules && sudo udevadm trigger --name-match=kvm
+          sudo apt-get update && sudo apt-get install -y qemu-system-x86
+          qemu-system-x86_64 -enable-kvm -cpu host -smp 4 -m 6G -display none \
+            -drive file="$DISK",if=virtio -serial file:serial.log &
+          for _ in $(seq 1 90); do
+            grep -q 'Reached target.*Graphical Interface' serial.log && break
+            sleep 10
+          done
+          kill %1 || true
+          if ! grep -q 'Reached target.*Graphical Interface' serial.log; then
+            tail -n 100 serial.log; echo "::error::VM did not reach the desktop in 15 minutes"; exit 1
+          fi
+          if grep 'Failed to start' serial.log; then
+            echo "::error::units failed during boot"; exit 1
+          fi
+
+  promote:
+    name: Promote to stable
+    needs: [build_push, verify]
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-26.04
+    concurrency:
+      group: promote-stable
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Retag the verified digest as stable
+        env:
+          IMAGE: ${{ needs.build_push.outputs.image }}
+          DIGEST: ${{ needs.build_push.outputs.digest }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          set -euo pipefail
+          command -v skopeo || { sudo apt-get update && sudo apt-get install -y skopeo; }
+          echo "$TOKEN" | skopeo login ghcr.io -u "$ACTOR" --password-stdin
+          for tag in "stable-$(date -u +%Y%m%d)" stable; do
+            skopeo copy --all --preserve-digests "docker://${IMAGE}@${DIGEST}" "docker://${IMAGE}:${tag}"
+          done
+          test "$(skopeo inspect --raw "docker://${IMAGE}:stable" | sha256sum | cut -d' ' -f1)" = "${DIGEST#sha256:}"
+
+  report:
+    name: Report result
+    needs: [build_push, verify, promote]
+    if: always() && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-26.04
+    permissions:
+      issues: write
+    steps:
+      - name: Open or close the update-failure issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          FAILED: ${{ contains(needs.*.result, 'failure') }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          gh label create update-failure --color B60205 --description "Automatic NECD OS update failed" 2>/dev/null || true
+          ISSUE=$(gh issue list --label update-failure --state open --json number --jq '.[0].number // empty')
+          if [[ "$FAILED" == true ]]; then
+            if [[ -n "$ISSUE" ]]; then
+              gh issue comment "$ISSUE" --body "Failed again: $RUN_URL"
+            else
+              gh issue create --label update-failure --title "NECD OS update failed" \
+                --body "stable was not changed; clinic PCs keep the last good image. Run: $RUN_URL"
+            fi
+          elif [[ -n "$ISSUE" ]]; then
+            gh issue close "$ISSUE" --comment "Fixed by $RUN_URL. stable is promoted."
+          fi

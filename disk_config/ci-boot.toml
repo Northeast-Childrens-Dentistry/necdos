@@ -1,0 +1,7 @@
+# CI boot test only: print systemd status on the serial console so the workflow can read it.
+[customizations.kernel]
+append = "console=ttyS0,115200 systemd.show_status=1 plymouth.enable=0"
+
+[[customizations.filesystem]]
+mountpoint = "/"
+minsize = "20 GiB"

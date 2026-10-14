@@ -1,0 +1,12 @@
+{
+  "KPlugin": {
+    "Authors": [
+      {
+        "Name": "Northeast Children's Dentistry"
+      }
+    ],
+    "Id": "NECD-Reading-Boy",
+    "Name": "NECD Reading Boy",
+    "License": "Proprietary, all rights reserved"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "KPlugin": {
+    "Authors": [
+      {
+        "Name": "Northeast Children's Dentistry"
+      }
+    ],
+    "Id": "NECD-Dentist-Chair",
+    "Name": "NECD Dentist Chair",
+    "License": "Proprietary, all rights reserved"
+  }
+}

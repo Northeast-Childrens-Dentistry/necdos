@@ -1,0 +1,24 @@
+{
+    "KPackageStructure": "Plasma/LookAndFeel",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "",
+                "Name": "Northeast Children's Dentistry"
+            }
+        ],
+        "Category": "",
+        "Description": "NECD OS - Theme variant of KDE BreezeDark",
+        "Id": "dev.getaurora.aurora.desktop",
+        "License": "GPLv2+",
+        "Name": "NECD OS",
+        "ServiceTypes": [
+            "Plasma/LookAndFeel"
+        ],
+        "Version": "0.01",
+        "Website": ""
+    },
+    "X-KDE-ParentApp": "",
+    "X-Plasma-RootContainmentLayout": "org.kde.plasma.desktop-layout.js",
+    "X-Plasma-MainScript": "defaults"
+}

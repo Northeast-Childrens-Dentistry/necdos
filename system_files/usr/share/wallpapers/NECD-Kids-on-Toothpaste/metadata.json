@@ -1,0 +1,12 @@
+{
+  "KPlugin": {
+    "Authors": [
+      {
+        "Name": "Northeast Children's Dentistry"
+      }
+    ],
+    "Id": "NECD-Kids-on-Toothpaste",
+    "Name": "NECD Kids on Toothpaste",
+    "License": "Proprietary, all rights reserved"
+  }
+}

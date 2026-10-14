@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# NECD OS: use the system fastfetch config (/etc/xdg/fastfetch/config.jsonc) instead of the upstream one.
+exec /usr/bin/fastfetch "${@}"

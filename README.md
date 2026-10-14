@@ -27,6 +27,8 @@ The planned pipeline checks upstream stable image digests daily, rebuilds on bas
 
 `ujust removekevcops` will reverse command-owned installations and settings using a persistent ledger, preserving preexisting resources, projects and personal settings/data. Removal is run manually; there is no automatic cleanup on shutdown.
 
+`ujust powerwash` is the factory reset: administrators (wheel group) only, requires the administrator password and typing the computer name, then erases all users' data and settings (everything under /var/home) while keeping the NECD OS image. Restart to finish.
+
 Full DX and host VPN integration may require deployment/reboot transitions. Resolve these in issues #9–10 before promising immediate toggles. Shared fonts/apps remain after personal cleanup.
 
 ## Incremental roadmap

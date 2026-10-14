@@ -12,6 +12,8 @@ enabled=1
 gpgcheck=1
 gpgkey=https://dl.google.com/linux/linux_signing_key.pub
 REPO
+# /opt is a symlink to /var/opt, which does not exist in the build container; rpm cannot mkdir /opt/google through a dangling link.
+mkdir -p "$(realpath -m /opt)"
 dnf5 install -y google-chrome-stable
 # Updates arrive via image rebuilds; keep the repo file but disabled.
 sed -i 's/^enabled=1/enabled=0/' /etc/yum.repos.d/google-chrome.repo

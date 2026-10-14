@@ -4,6 +4,7 @@ set -euo pipefail
 
 # Add only NECD identity in this foundation; preserve Aurora packages/services.
 cp -avf /ctx/system_files/. /
+bash /ctx/apps.sh
 install -d -m 0755 /usr/share/necdos
 cat > /usr/share/necdos/release.json <<'JSON'
 {

@@ -28,6 +28,8 @@ cp -f --remove-destination $B/wordmark.svg /usr/share/pixmaps/aurora-banner.svg
 cp -f --remove-destination $B/system-logo.png /usr/share/pixmaps/system-logo.png
 cp -f --remove-destination $B/system-logo-white.png /usr/share/pixmaps/system-logo-white.png
 # NECD boot splash: select the theme and rebuild the initramfs (same dracut call Aurora uses).
+# The script-module plugin is not in the base image; the theme needs it.
+dnf5 install -y plymouth-plugin-script
 plymouth-set-default-theme necd
 KERNEL_VERSION=$(rpm -q --queryformat="%{evr}.%{arch}" kernel-core)
 INITRAMFS="/usr/lib/modules/${KERNEL_VERSION}/initramfs.img"

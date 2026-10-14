@@ -2,12 +2,19 @@
 # Reboot into a staged NECD OS update, only when nobody is logged in. Any error means no reboot.
 # ponytail: a locked session left overnight blocks the reboot; the update then waits for the next manual restart.
 set -euo pipefail
+# A timer that came due during suspend fires on resume; never reboot in front of staff in the morning.
+if [[ $(date +%H) != 0[2-4] ]]; then
+    echo "Outside the 02:00-04:59 window. Not rebooting."
+    exit 0
+fi
 if ! bootc status --format=json | jq -e '.status.staged != null' >/dev/null; then
     echo "No staged update."
     exit 0
 fi
-if loginctl list-sessions -o json | jq -e 'any(.[]; .class | startswith("user"))' >/dev/null; then
-    echo "Update staged, but a user is logged in. Not rebooting."
+# Capture first so a loginctl failure stops the script (set -e) instead of looking like "no sessions".
+sessions=$(loginctl list-sessions -o json)
+if ! jq -e 'type == "array" and all(.[]; .class | startswith("user") | not)' <<<"$sessions" >/dev/null; then
+    echo "Update staged, but a user is logged in (or sessions could not be read). Not rebooting."
     exit 0
 fi
 echo "Rebooting into the staged update."

@@ -1,0 +1,7 @@
+[General]
+FreeFloating=true
+
+[Plugins]
+# Aurora ships Bazaar; NECD OS uses Discover (its appstream runner is removed in build, see apps.sh)
+krunner_appstreamEnabled=false
+bazaarrunnerEnabled=false

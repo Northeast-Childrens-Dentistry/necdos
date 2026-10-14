@@ -1,0 +1,9 @@
+[Unit]
+Description=Nightly check for a staged NECD OS update
+
+[Timer]
+# No Persistent=: a PC that was off at 02:00 must not reboot when staff turn it on.
+OnCalendar=*-*-* 02:00
+
+[Install]
+WantedBy=timers.target

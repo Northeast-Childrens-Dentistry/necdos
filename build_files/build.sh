@@ -13,6 +13,7 @@ rm -rf /usr/share/wallpapers/Aurora /usr/share/wallpapers/aurora-wallpaper-* \
 rm -f /usr/share/backgrounds/default.jxl /usr/share/backgrounds/default-dark.jxl
 
 cp -avf /ctx/system_files/. /
+systemctl enable necd-update-reboot.timer
 
 ### Identity: rename the OS and cut Aurora's own links. ID/VARIANT_ID/IMAGE_ID stay "aurora" for now
 ### because upstream tooling keys on them; change only after testing in a VM.
@@ -80,6 +81,10 @@ ujust toggle-devmode | grep -q "not available on NECD OS"
 [[ "$BASE_IMAGE" == ghcr.io/ublue-os/aurora:stable@sha256:* ]] || { echo "base not pinned: $BASE_IMAGE" >&2; exit 1; }
 test "$(jq -r .base /usr/share/necdos/release.json)" = "$BASE_IMAGE"
 test "$(jq -r '."image-tag"' /usr/share/ublue-os/image-info.json)" = "$IMAGE_TAG"
+test -e /usr/lib/systemd/system/uupd.timer   # Aurora's updater stages the updates this timer activates
+test -L /etc/systemd/system/timers.target.wants/necd-update-reboot.timer
+if grep -q '^Persistent=' /usr/lib/systemd/system/necd-update-reboot.timer; then exit 1; fi   # `! grep` would not fail under set -e
+test -x /usr/libexec/necd-update-reboot
 
 # Fail the build if branding did not land.
 for f in /usr/share/wallpapers/Aurora/contents/images/3840x2160.jxl \

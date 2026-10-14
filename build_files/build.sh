@@ -13,6 +13,8 @@ rm -rf /usr/share/wallpapers/Aurora /usr/share/wallpapers/aurora-wallpaper-* \
 rm -f /usr/share/backgrounds/default.jxl /usr/share/backgrounds/default-dark.jxl
 
 cp -avf /ctx/system_files/. /
+bash /ctx/apps.sh
+
 
 ### Identity: rename the OS and cut Aurora's own links. ID/VARIANT_ID/IMAGE_ID stay "aurora" for now
 ### because upstream tooling keys on them; change only after testing in a VM.

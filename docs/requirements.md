@@ -11,6 +11,7 @@ Recorded October 13, 2026. Implements the planning portion of [issue #1](https:/
 | Brave | Installed alternative browser | Prefer Flatpak if workflow testing passes; #5 |
 | Krita | Installed by default on every NECD OS workstation; survives personal cleanup | Flatpak preferred; package identity and updates validated in #7 |
 | Zoom | Installed by default on every NECD OS workstation; survives personal cleanup | Flatpak `us.zoom.Zoom` (proprietary Zoom binary, community-maintained wrapper, not verified by Zoom). Verify meetings, audio/video, screen sharing under Wayland and updates in #7 |
+| LibreOffice | Installed by default on every NECD OS workstation; survives personal cleanup | Flatpak `org.libreoffice.LibreOffice` (MPL-2.0; not shipped by Aurora). Verify Word/Excel file compatibility, printing and updates in #7 |
 | CareStack | Distinct Chrome app window/menu entry using supplied icon | https://necdsa.carestack.com; #6 |
 | Iris chat | Distinct Chrome app window/menu entry using supplied icon | http://iris-mw.carestack.com/?; inspect redirect/HTTPS behavior before changing destination; #6 |
 | Waydroid | Host runtime included, documented per-device Android initialization | Audit compatible Bazzite integration, kernel/binder, graphics, services and networking; #8 |
@@ -19,7 +20,7 @@ Recorded October 13, 2026. Implements the planning portion of [issue #1](https:/
 | NECD fonts | Include NECD website font families | Source commit pinned below; desktop format and font names verified in #12 |
 | Apple emoji | Default emoji family where supported; retain glyph fallback | Linux font plus dedicated fontconfig preference; KDE/Qt and browser testing in #12 |
 
-The requested shared scope is the list above. Kevin confirmed Krita as a missing default app on October 13, 2026, and added Zoom the same day. Teams for Linux is personal-only (kevcops manifest). This is a living manifest: future shared app additions go here and into #7, and are delivered by the normal NECD update/provisioning path. Personal-only additions go into the kevcops manifest and retain reversible installation tracking. Extra 3D imaging/design applications are excluded from the shared image. MeshLab is an explicit personal-only exception. No Google Play/GApps requirement has been specified for Waydroid. This does not remove Aurora base applications without a separate approved need.
+The requested shared scope is the list above. Kevin confirmed Krita as a missing default app on October 13, 2026, and added Zoom the same day, and LibreOffice on October 14, 2026. Teams for Linux is personal-only (kevcops manifest). This is a living manifest: future shared app additions go here and into #7, and are delivered by the normal NECD update/provisioning path. Personal-only additions go into the kevcops manifest and retain reversible installation tracking. Extra 3D imaging/design applications are excluded from the shared image. MeshLab is an explicit personal-only exception. No Google Play/GApps requirement has been specified for Waydroid. This does not remove Aurora base applications without a separate approved need.
 
 Supplied icon filenames from the prior work: CS.ico, image.png and 64.png. Inspect bytes and associate each with its correct application before importing; filenames alone are not enough.
 

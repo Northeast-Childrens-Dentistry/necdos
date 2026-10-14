@@ -1,6 +1,6 @@
 #!/bin/bash
 # Shared apps: Google Chrome RPM (+ default browser) and build-time checks.
-# Flatpaks (Krita, Zoom, Brave, Firefox) ship as system_files preinstall.d entries.
+# Flatpaks (Krita, Zoom, Brave, Firefox, LibreOffice) ship as system_files preinstall.d entries.
 set -euo pipefail
 
 # --- Google Chrome (repo enabled only for this install) ---
@@ -31,7 +31,7 @@ done
 
 # --- Build-time checks ---
 fail() { echo "apps.sh check failed: $*" >&2; exit 1; }
-for f in krita zoom brave firefox; do
+for f in krita zoom brave firefox libreoffice; do
     grep -q '^\[Flatpak Preinstall ' "/usr/share/flatpak/preinstall.d/$f.preinstall" || fail "$f.preinstall"
 done
 [[ -x /usr/lib/opt/google/chrome/google-chrome ]] || fail "chrome binary"

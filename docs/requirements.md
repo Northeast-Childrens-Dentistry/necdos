@@ -57,7 +57,7 @@ Implementation owners: #9 (developer architecture), #10 (living install/removal)
 
 - Build a small NECD layer on Aurora stable using the Universal Blue image template; no routine full-Aurora source-fork merges.
 - Track upstream image digest changes automatically, rebuild, validate, sign and promote successful candidates. Record exact digests for provenance.
-- Clients retain automatic staging and activate OS updates at normal reboot. No forced reboot during clinical work.
+- Clients retain automatic staging and activate OS updates at the next boot, including a 02:00 reboot that only runs when nobody is logged in. No forced reboot during clinical work.
 - Failed builds leave last working published images intact. Verify rollback and stale-build detection.
 - Prefer GUI applications through supported upstream/Flatpak delivery. Host-integrated components such as Waydroid/NordVPN require their own tested integration.
 - Start with a spare pilot workstation. Clinical workflow and peripheral compatibility must pass before practice rollout.

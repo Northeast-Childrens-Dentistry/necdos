@@ -1,0 +1,47 @@
+---
+name: Update heartbeat
+on:
+  schedule:
+    - cron: "23 13 * * *"  # daily, morning US Eastern
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  heartbeat:
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Check stable is keeping up with Aurora
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          command -v skopeo || { sudo apt-get update && sudo apt-get install -y skopeo; }
+          OURS=docker://ghcr.io/northeast-childrens-dentistry/necdos:stable
+          AURORA=docker://ghcr.io/ublue-os/aurora:stable
+          if ! BASE=$(skopeo inspect --no-creds "$OURS" | jq -er '.Labels["io.necdos.base-image"]'); then
+            echo "No labeled stable yet; skipping staleness check."
+            exit 0
+          fi
+          # Top-level digest of the tag (Aurora is a manifest list), as pinned in Containerfile.
+          LATEST="sha256:$(skopeo inspect --no-creds --raw "$AURORA" | sha256sum | cut -d' ' -f1)"
+          CREATED=$(skopeo inspect --no-creds "$AURORA" | jq -r .Created)
+          AGE_DAYS=$(( ($(date +%s) - $(date -d "$CREATED" +%s)) / 86400 ))
+          gh label create update-stale --color FBCA04 --description "stable is behind Aurora" 2>/dev/null || true
+          ISSUE=$(gh issue list --label update-stale --state open --json number --jq '.[0].number // empty')
+          # 19 = 5-day soak + 14 days grace.
+          if [[ "$BASE" != *"@$LATEST" && $AGE_DAYS -ge 19 ]]; then
+            MSG="stable is built on ${BASE#*@}; Aurora stable has been ${LATEST} for ${AGE_DAYS} days. Check the Renovate Dependency Dashboard and the last build run."
+            if [[ -n "$ISSUE" ]]; then gh issue comment "$ISSUE" --body "$MSG"
+            else gh issue create --label update-stale --title "NECD OS stable is behind Aurora" --body "$MSG"; fi
+          elif [[ -n "$ISSUE" && "$BASE" == *"@$LATEST" ]]; then
+            gh issue close "$ISSUE" --comment "stable is on the current Aurora digest again."
+          fi
+
+      - name: Ping healthchecks.io
+        env:
+          HC_PING_URL: ${{ secrets.HC_PING_URL }}
+        run: curl -fsS -m 10 --retry 5 "$HC_PING_URL"

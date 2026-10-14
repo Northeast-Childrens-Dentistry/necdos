@@ -295,6 +295,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           FAILED: ${{ contains(needs.*.result, 'failure') }}
+          PROMOTED: ${{ needs.promote.result == 'success' }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
@@ -307,6 +308,7 @@ jobs:
               gh issue create --label update-failure --title "NECD OS update failed" \
                 --body "stable was not changed; clinic PCs keep the last good image. Run: $RUN_URL"
             fi
-          elif [[ -n "$ISSUE" ]]; then
+          elif [[ -n "$ISSUE" && "$PROMOTED" == true ]]; then
+            # Only a real promotion closes the issue; a cancelled run changes nothing.
             gh issue close "$ISSUE" --comment "Fixed by $RUN_URL. stable is promoted."
           fi

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=System Update
+Comment=Update NECD OS, Flatpaks and Homebrew.
+Icon=system-software-update
+Categories=ConsoleOnly;System;
+Terminal=true
+Exec=/usr/bin/ujust update

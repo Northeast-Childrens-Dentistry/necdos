@@ -35,6 +35,16 @@ A missing secret guard cannot validate whether a supplied key is correct. Before
 
 Private GHCR pull access must be resolved for the pilot before installing. Secure Boot kernel trust is separate from OCI signing. Do not disable Secure Boot or image verification as a shortcut.
 
+## Client signature policy
+
+The image ships `/etc/pki/containers/necd.pub` (the cosign public key) and a `sigstoreSigned` entry for `ghcr.io/northeast-childrens-dentistry/necdos` in `/etc/containers/policy.json`, with `use-sigstore-attachments` set in `/etc/containers/registries.d/necdos.yaml`. The policy is only applied when the machine pulls the image through the signed transport. Switch with:
+
+```bash
+sudo bootc switch --enforce-container-sigpolicy ghcr.io/northeast-childrens-dentistry/necdos:candidate
+```
+
+A plain `bootc switch` (without the flag) does not verify signatures. After a signed switch, `bootc status` and the terminal image line show the lock. Negative test: switching with the flag to an unsigned digest must be refused.
+
 ## Remaining acceptance gates for issue #3
 
 - [ ] Successful candidate CI container build/lint/rechunk.

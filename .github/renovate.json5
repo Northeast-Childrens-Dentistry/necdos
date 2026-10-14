@@ -11,12 +11,14 @@
       "automerge": true,
       "matchUpdateTypes": ["pin", "pinDigest"]
     },
-    // This prevents the default demo image used in ublue-os/image-template
-    // from being pinned as it serves no purpose there
+    // NECD soak: take a new Aurora stable digest only after it has been published 5 days,
+    // and merge it automatically when the PR build passes.
     {
       "matchDatasources": ["docker"],
       "matchPackageNames": ["ghcr.io/ublue-os/aurora"],
-      "pinDigests": false
+      "matchUpdateTypes": ["digest"],
+      "minimumReleaseAge": "5 days",
+      "automerge": true,
     },
     {
       "enabled": false,

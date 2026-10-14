@@ -1,0 +1,12 @@
+{
+  "KPlugin": {
+    "Authors": [
+      {
+        "Name": "Northeast Children's Dentistry"
+      }
+    ],
+    "Id": "Aurora",
+    "Name": "NECD OS",
+    "License": "Proprietary, all rights reserved"
+  }
+}

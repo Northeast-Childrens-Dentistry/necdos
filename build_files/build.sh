@@ -109,4 +109,4 @@ for f in /usr/share/wallpapers/Aurora/contents/images/3840x2160.jxl \
   test -s "$f" || { echo "missing $f" >&2; exit 1; }
 done
 grep -q NECD-Kids-on-Toothpaste /usr/share/plasma/look-and-feel/dev.getaurora.aurora.desktop/contents/plasmoidsetupscripts/org.kde.plasma.folder.js
-\ngrep -qx "Name=Files" /usr/share/applications/org.kde.dolphin.desktop\n
+grep -qx "Name=Files" /usr/share/applications/org.kde.dolphin.desktop

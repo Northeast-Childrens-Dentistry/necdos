@@ -9,6 +9,8 @@ set -euo pipefail
 rm -rf /usr/share/wallpapers/Aurora /usr/share/wallpapers/aurora-wallpaper-* \
   /usr/share/wallpapers/greg-rakozy-aurora /usr/share/wallpapers/jonatan-pie-aurora \
   /usr/share/backgrounds/aurora
+# default.jxl/default-dark.jxl are upstream symlinks into that folder; cp will not write through a dangling link.
+rm -f /usr/share/backgrounds/default.jxl /usr/share/backgrounds/default-dark.jxl
 
 cp -avf /ctx/system_files/. /
 

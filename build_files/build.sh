@@ -40,6 +40,10 @@ rm -f /usr/share/applications/dev.getaurora.{discussions,documentation,offline-d
   /usr/share/ublue-os/motd/tips/10-tips.md /usr/share/ublue-os/aurora-ascii-logo.txt
 rm -rf /usr/share/doc/aurora
 
+# Friendlier app names for non-technical users: change the menu entry's display name only
+# (window titles inside the app still say Dolphin). Keywords keep "dolphin" searchable.
+sed -i -E '/^\[Desktop Action/,$!{/^Name\[[^]]*\]=/d}; s/^Name=Dolphin$/Name=Files/' /usr/share/applications/org.kde.dolphin.desktop
+
 ### Trust: require a valid NECD signature for the NECD image (cosign.pub), keeping upstream entries.
 python3 - <<'PY'
 import json
@@ -96,3 +100,4 @@ for f in /usr/share/wallpapers/Aurora/contents/images/3840x2160.jxl \
   test -s "$f" || { echo "missing $f" >&2; exit 1; }
 done
 grep -q NECD-Kids-on-Toothpaste /usr/share/plasma/look-and-feel/dev.getaurora.aurora.desktop/contents/plasmoidsetupscripts/org.kde.plasma.folder.js
+\ngrep -qx "Name=Files" /usr/share/applications/org.kde.dolphin.desktop\n

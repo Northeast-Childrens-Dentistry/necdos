@@ -65,7 +65,7 @@ Check what a machine is running: `sudo bootc status` (booted, staged and rollbac
 
 ## How updates work
 
-> **Planned, not active yet.** The `stable`/`testing` promotion, dated `stable-YYYYMMDD` tags and overnight reboot below are the design in [#4](https://github.com/Northeast-Childrens-Dentistry/necdos/issues/4), which has not merged. Today there is no `stable` tag; see the workflow runs and tags on GitHub for what is actually published.
+> **Planned, not active yet.** The `stable`/`testing` promotion, dated `stable-YYYYMMDD` tags and overnight reboot below are the design in [#4](https://github.com/Northeast-Childrens-Dentistry/necdos/issues/4), which has not merged. Today only `candidate` tags (`candidate`, `candidate-YYYYMMDD`, `candidate-<sha>`) are published, and there is no `stable` tag.
 
 1. The build pipeline rebuilds when Aurora stable or this repo changes, then signs the image and publishes it as `ghcr.io/northeast-childrens-dentistry/necdos`.
 2. Only an image that passes the build, signature and boot checks is promoted to the `stable` tag. Clinic PCs follow `stable`. Dated tags `stable-YYYYMMDD` are kept as rollback points.

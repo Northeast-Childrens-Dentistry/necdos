@@ -40,6 +40,19 @@ rm -f /usr/share/applications/dev.getaurora.{discussions,documentation,offline-d
   /usr/share/ublue-os/motd/tips/10-tips.md /usr/share/ublue-os/aurora-ascii-logo.txt
 rm -rf /usr/share/doc/aurora
 
+# Friendlier app names for non-technical users: change only the menu entry's display name
+# (window titles inside the apps keep their own name). Keywords keep the old name searchable.
+rename_app() {
+  local f=/usr/share/applications/$1.desktop
+  [ -f "$f" ] || { echo "rename_app: $f not found, skipping"; return 0; }
+  sed -i -E "/^\[Desktop Action/,\$!{/^Name\[[^]]*\]=/d}; s/^Name=$2\$/Name=$3/" "$f"
+  grep -qx "Name=$3" "$f"
+}
+rename_app org.kde.dolphin Dolphin "Files"
+rename_app org.kde.konsole Konsole "Terminal"
+rename_app org.kde.kate Kate "Text Editor"
+rename_app org.kde.ark Ark "Archive Manager"
+
 ### Trust: require a valid NECD signature for the NECD image (cosign.pub), keeping upstream entries.
 python3 - <<'PY'
 import json
@@ -96,3 +109,4 @@ for f in /usr/share/wallpapers/Aurora/contents/images/3840x2160.jxl \
   test -s "$f" || { echo "missing $f" >&2; exit 1; }
 done
 grep -q NECD-Kids-on-Toothpaste /usr/share/plasma/look-and-feel/dev.getaurora.aurora.desktop/contents/plasmoidsetupscripts/org.kde.plasma.folder.js
+grep -qx "Name=Files" /usr/share/applications/org.kde.dolphin.desktop

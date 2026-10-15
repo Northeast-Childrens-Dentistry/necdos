@@ -68,6 +68,11 @@ toggle-dinosaurs hemisphere="north":
     #!/usr/bin/bash
     echo "Not available."
 
+[private]
+setup-sunshine ACTION="":
+    #!/usr/bin/bash
+    echo "Not available."
+
 # Imports
 import "/usr/share/ublue-os/just/changelog.just"
 import "/usr/share/ublue-os/just/system.just"

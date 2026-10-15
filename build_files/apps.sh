@@ -1,6 +1,6 @@
 #!/bin/bash
 # Shared apps: Google Chrome RPM (+ default browser) and build-time checks.
-# Flatpaks (Krita, Zoom, Brave, Firefox, LibreOffice) ship as system_files preinstall.d entries.
+# Flatpaks (Krita, Zoom, Brave, Firefox, LibreOffice, Bottles) ship as system_files preinstall.d entries.
 set -euo pipefail
 
 # --- Google Chrome (repo enabled only for this install) ---
@@ -31,7 +31,7 @@ done
 
 # --- Build-time checks ---
 fail() { echo "apps.sh check failed: $*" >&2; exit 1; }
-for f in krita zoom brave firefox libreoffice; do
+for f in krita zoom brave firefox libreoffice bottles; do
     grep -q '^\[Flatpak Preinstall ' "/usr/share/flatpak/preinstall.d/$f.preinstall" || fail "$f.preinstall"
 done
 [[ -x /usr/lib/opt/google/chrome/google-chrome ]] || fail "chrome binary"
@@ -66,3 +66,8 @@ XDG_CONFIG_HOME=/usr/share/applications xdg-mime default org.kde.discover.deskto
 [[ ! -e /usr/share/flatpak/preinstall.d/bazaar.preinstall ]] || fail "bazaar preinstall still present"
 grep -qx 'application/vnd.flatpak.ref=org.kde.discover.desktop' /usr/share/applications/mimeapps.list || fail "flatpakref default"
 grep -q 'applications:org.kde.discover.desktop' /usr/share/plasma/look-and-feel/dev.getaurora.aurora.desktop/contents/layouts/org.kde.plasma.desktop-layout.js || fail "taskbar discover pin"
+
+# --- Sunshine (game-streaming host) is not wanted on NECD OS ---
+dnf5 -y remove Sunshine
+rm -f /usr/lib/systemd/user-preset/89-aurora-sunshine.preset
+if rpm -q Sunshine >/dev/null 2>&1; then fail "Sunshine still installed"; fi

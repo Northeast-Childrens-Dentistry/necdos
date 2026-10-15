@@ -81,3 +81,8 @@ grep -q 'applications:org.kde.discover.desktop' /usr/share/plasma/look-and-feel/
 dnf5 -y remove Sunshine
 rm -f /usr/lib/systemd/user-preset/89-aurora-sunshine.preset
 if rpm -q Sunshine >/dev/null 2>&1; then fail "Sunshine still installed"; fi
+
+# --- Arial / Times New Roman: fetched per computer by `ujust install-ms-fonts` (not redistributable) ---
+dnf5 install -y --setopt=install_weak_deps=False cabextract
+command -v cabextract >/dev/null || fail "cabextract"
+ujust --summary | tr ' ' '\n' | grep -qx install-ms-fonts || fail "install-ms-fonts recipe"

@@ -36,6 +36,8 @@ for f in krita zoom brave firefox libreoffice bottles; do
 done
 [[ -x /usr/lib/opt/google/chrome/google-chrome ]] || fail "chrome binary"
 [[ -s /etc/opt/chrome/policies/managed/necd.json ]] || fail "chrome managed policy"
+[[ -x /usr/libexec/necd/set-defaults ]] || fail "set-defaults script"
+[[ -f /usr/share/ublue-os/user-setup.hooks.d/50-necd-defaults.sh ]] || fail "first-login defaults hook"
 # Dangling until boot: the target is /opt/google (tmpfiles relinks it), so test the link, not what it points to.
 [[ -L /usr/bin/google-chrome ]] || fail "/usr/bin/google-chrome"
 [[ -f /usr/share/applications/google-chrome.desktop ]] || fail "chrome desktop file"

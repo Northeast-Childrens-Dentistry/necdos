@@ -110,3 +110,7 @@ for f in /usr/share/wallpapers/Aurora/contents/images/3840x2160.jxl \
 done
 grep -q NECD-Kids-on-Toothpaste /usr/share/plasma/look-and-feel/dev.getaurora.aurora.desktop/contents/plasmoidsetupscripts/org.kde.plasma.folder.js
 grep -qx "Name=Files" /usr/share/applications/org.kde.dolphin.desktop
+K=/usr/share/kde-settings/kde-profile/default/xdg/kglobalshortcutsrc
+grep -qx 'Log Out=Ctrl+Shift+Esc,Ctrl+Shift+Esc,Show Logout Screen' "$K"
+grep -qx '_launch=Ctrl+Alt+Del\\tMeta+Esc' "$K"
+test -e /usr/share/applications/org.kde.plasma-systemmonitor.desktop

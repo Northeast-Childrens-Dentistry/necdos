@@ -1,0 +1,6 @@
+# Windows muscle memory: Ctrl+Alt+Del opens System Monitor (task manager); the logout screen moves to Ctrl+Shift+Esc. See #33.
+[ksmserver]
+Log Out=Ctrl+Shift+Esc,Ctrl+Shift+Esc,Show Logout Screen
+
+[services][org.kde.plasma-systemmonitor.desktop]
+_launch=Ctrl+Alt+Del\tMeta+Esc

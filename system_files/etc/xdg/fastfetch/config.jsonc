@@ -4,5 +4,28 @@
     "type": "file-raw",
     "source": "/usr/share/necdos/logo.ans",
     "padding": { "right": 3 }
-  }
+  },
+  "modules": [
+    "title",
+    "separator",
+    "os",
+    "host",
+    "kernel",
+    "uptime",
+    "packages",
+    "shell",
+    "display",
+    "de",
+    "wm",
+    "terminal",
+    "cpu",
+    "gpu",
+    "memory",
+    "swap",
+    "disk",
+    "localip",
+    "battery",
+    "break",
+    "colors"
+  ]
 }

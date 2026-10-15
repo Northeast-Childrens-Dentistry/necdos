@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# NECD OS: make Google Chrome the default browser for the current user. Safe to re-run.
+# Usage: set-defaults          set it, printing the state before and after
+#        set-defaults --check  only print the current state
+set -u
+chrome=google-chrome.desktop
+types="x-scheme-handler/http x-scheme-handler/https text/html application/xhtml+xml"
+
+show() {
+  echo "  xdg-settings default-web-browser: $(xdg-settings get default-web-browser 2>&1)"
+  for t in $types; do echo "  mime $t: $(xdg-mime query default "$t" 2>&1)"; done
+  echo "  kdeglobals BrowserApplication: $(kreadconfig6 --file kdeglobals --group General --key BrowserApplication 2>&1)"
+  grep -s -H -i -E 'firefox|chrome' "$HOME/.config/mimeapps.list" "$HOME/.local/share/applications/mimeapps.list" | sed 's/^/  user file: /'
+}
+
+if [ "${1:-}" = "--check" ]; then show; exit 0; fi
+
+# An account that has never opened Chrome gets no first-run dialog (default-browser / usage-report prompts).
+if [ ! -e "$HOME/.config/google-chrome/Local State" ]; then
+  mkdir -p "$HOME/.config/google-chrome" && touch "$HOME/.config/google-chrome/First Run"
+fi
+
+echo "Before:"; show
+for t in $types; do xdg-mime default "$chrome" "$t"; done
+xdg-settings set default-web-browser "$chrome" 2>/dev/null || true
+kwriteconfig6 --file kdeglobals --group General --key BrowserApplication "$chrome"
+echo "After:"; show
+
+# Exit status says whether it worked (the first-login hook ignores it; a person running it by hand sees it).
+[ "$(xdg-mime query default x-scheme-handler/https)" = "$chrome" ]

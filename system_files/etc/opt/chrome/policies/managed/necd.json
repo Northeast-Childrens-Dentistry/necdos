@@ -1,4 +1,5 @@
 {
   "DefaultBrowserSettingEnabled": false,
-  "PromotionsEnabled": false
+  "PromotionsEnabled": false,
+  "MetricsReportingEnabled": false
 }

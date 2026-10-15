@@ -1,0 +1,31 @@
+# NECD OS boot splash: centered wordmark on cream, gentle pulse, disk-password prompt.
+Window.SetBackgroundTopColor(1.0, 0.984, 0.953);
+Window.SetBackgroundBottomColor(1.0, 0.984, 0.953);
+
+logo.image = Image("logo.png");
+ratio = Window.GetWidth() * 0.35 / logo.image.GetWidth();
+logo.scaled = logo.image.Scale(logo.image.GetWidth() * ratio, logo.image.GetHeight() * ratio);
+logo.sprite = Sprite(logo.scaled);
+logo.x = Window.GetWidth() / 2 - logo.scaled.GetWidth() / 2;
+logo.y = Window.GetHeight() / 2 - logo.scaled.GetHeight() / 2;
+logo.sprite.SetPosition(logo.x, logo.y, 10);
+
+progress = 0;
+fun refresh_callback() {
+  progress++;
+  logo.sprite.SetOpacity(0.8 + 0.2 * Math.Sin(progress / 18));
+}
+Plymouth.SetRefreshFunction(refresh_callback);
+
+# Without this, an encrypted disk's password prompt would be invisible.
+prompt.sprite = Sprite();
+fun password_callback(prompt_text, bullets) {
+  text = prompt_text + " ";
+  for (i = 0; i < bullets; i++) text = text + "*";
+  img = Image.Text(text, 0.2, 0.2, 0.2);
+  prompt.sprite.SetImage(img);
+  prompt.sprite.SetPosition(Window.GetWidth() / 2 - img.GetWidth() / 2, logo.y + logo.scaled.GetHeight() + 40, 20);
+}
+fun normal_callback() { prompt.sprite.SetOpacity(0); }
+Plymouth.SetDisplayPasswordFunction(password_callback);
+Plymouth.SetDisplayNormalFunction(normal_callback);

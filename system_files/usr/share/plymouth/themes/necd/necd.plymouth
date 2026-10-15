@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=NECD OS
+Description=NECD OS boot splash
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/necd
+ScriptFile=/usr/share/plymouth/themes/necd/necd.script

@@ -31,6 +31,17 @@ The planned pipeline checks upstream stable image digests daily, rebuilds on bas
 
 Full DX and host VPN integration may require deployment/reboot transitions. Resolve these in issues #9–10 before promising immediate toggles. Shared fonts/apps remain after personal cleanup.
 
+## Administrator setup
+
+**Name each computer.** NECD OS does not ship a fixed hostname, so a new install shows a generic name (`aurora`). Give every PC its own name, for example one that identifies the room, so it can be told apart on the network:
+
+```bash
+sudo hostnamectl set-hostname necd-<room>   # e.g. necd-front-desk
+hostnamectl                                  # confirm "Static hostname"
+```
+
+`ujust powerwash` asks for this name, so set it first. Reboot or log out and in to see it everywhere.
+
 ## Incremental roadmap
 
 | Step | Issue |

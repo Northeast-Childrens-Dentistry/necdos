@@ -29,6 +29,11 @@ for t in x-scheme-handler/http x-scheme-handler/https text/html application/xhtm
     XDG_CONFIG_HOME=/usr/share/applications xdg-mime default google-chrome.desktop "$t"
 done
 
+# KDE reads its own kde-mimeapps.list BEFORE the generic mimeapps.list; Aurora/Fedora's sets web links
+# to Falkon (not installed), so KDE apps (Welcome Center, Flatpak link portal) ignored Chrome.
+sed -i -E 's#^(x-scheme-handler/https?)=.*#\1=google-chrome.desktop#; s#^(text/html|application/xhtml\+xml)=.*#\1=google-chrome.desktop#' \
+    /usr/share/applications/kde-mimeapps.list
+
 # --- Build-time checks ---
 fail() { echo "apps.sh check failed: $*" >&2; exit 1; }
 for f in krita zoom brave firefox libreoffice bottles; do
@@ -46,6 +51,7 @@ grep -q '^L+ /var/opt/google ' /usr/lib/tmpfiles.d/necdos-google-chrome.conf || 
 [[ ! -e "$(realpath /opt)/google" ]] || fail "/opt/google not relocated"
 for t in http https; do
     grep -qx "x-scheme-handler/$t=google-chrome.desktop" /usr/share/applications/mimeapps.list || fail "default browser $t"
+    grep -qx "x-scheme-handler/$t=google-chrome.desktop" /usr/share/applications/kde-mimeapps.list || fail "KDE default browser $t"
 done
 
 # Taskbar and launchers for the practice apps.

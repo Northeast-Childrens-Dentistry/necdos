@@ -2,7 +2,7 @@
 
 An Aurora-based workstation image for Northeast Children’s Dentistry and a precursor to CarestackOS.
 
-**Status: planning and template scaffolding. No validated NECD OS release is available yet.** The copied template build configuration has not yet been converted to Aurora or configured for signed NECD releases.
+**Status: pilot build.** The image builds on Aurora stable, is signed, and includes the NECD app set (CareStack and Iris windows, Chrome defaults, shortcuts) and the fonts recipe. Automatic stable promotion and overnight updates ([#4](https://github.com/Northeast-Childrens-Dentistry/necdos/issues/4)) are not active yet, and it has not been validated for practice rollout.
 
 [Project board](https://github.com/orgs/Northeast-Childrens-Dentistry/projects/2) · [Implementation issues](https://github.com/Northeast-Childrens-Dentistry/necdos/issues)
 
@@ -52,6 +52,67 @@ hostnamectl                                  # confirm "Static hostname"
 ```
 
 `ujust powerwash` asks for this name, so set it first. Reboot or log out and in to see it everywhere.
+
+## Immutable system
+
+NECD OS is an image-based (bootc/ostree) system, not a package-by-package install. `/usr` is read-only and is replaced as a whole by each update; `/etc` and `/var` (including every home under `/var/home`) are writable and carry over between versions. Consequences for admins:
+
+- Don't `dnf install` or edit files under `/usr` on a clinic PC. Changes either fail or vanish on the next image. Put system-wide changes in this repo (`system_files/` or `build_files/build.sh`); put apps in Flatpak.
+- Every update is a complete, signed image. A machine is on exactly one version, so two PCs on the same tag are identical.
+- The previous image stays on disk next to the new one, which is what makes rollback safe.
+
+Check what a machine is running: `sudo bootc status` (booted, staged and rollback images, with digests).
+
+## How updates work
+
+> **Planned, not active yet.** The `stable`/`testing` promotion, dated `stable-YYYYMMDD` tags and overnight reboot below are the design in [#4](https://github.com/Northeast-Childrens-Dentistry/necdos/issues/4), which has not merged. Today there is no `stable` tag; see the workflow runs and tags on GitHub for what is actually published.
+
+1. The build pipeline rebuilds when Aurora stable or this repo changes, then signs the image and publishes it as `ghcr.io/northeast-childrens-dentistry/necdos`.
+2. Only an image that passes the build, signature and boot checks is promoted to the `stable` tag. Clinic PCs follow `stable`. Dated tags `stable-YYYYMMDD` are kept as rollback points.
+3. Aurora's updater downloads the new image in the background and **stages** it. Nothing changes for the running session.
+4. The staged image takes effect at the next reboot. Planned: an overnight (02:00) reboot, only when nobody is logged in.
+5. If a build fails, `stable` doesn't move and PCs stay on the last working release.
+
+Images are signature-checked by the client against `cosign.pub`; a tag that isn't signed by the NECD key won't be accepted.
+
+## Rolling back
+
+> **Untested in a VM.** Rolling back to the previous image is standard bootc behavior, but these steps have not been verified on NECD OS. The `stable-YYYYMMDD` pinning part depends on [#4](https://github.com/Northeast-Childrens-Dentistry/necdos/issues/4) (planned, not active yet).
+
+Reboot into the previous image. Per-user data and settings are untouched.
+
+```bash
+sudo bootc status          # confirm a rollback image exists
+sudo bootc rollback        # makes the previous image the next boot
+systemctl reboot
+```
+
+You can also pick the previous entry in the boot menu (GRUB) at startup for a one-off boot.
+
+`bootc rollback` returns to the old image, but the machine will stage the bad `stable` again on its next update. To hold a machine on a known-good release until a fix ships, pin it to a dated tag:
+
+```bash
+sudo bootc switch ghcr.io/northeast-childrens-dentistry/necdos:stable-YYYYMMDD
+systemctl reboot
+```
+
+Return to normal tracking with `sudo bootc switch ghcr.io/northeast-childrens-dentistry/necdos:stable`.
+
+If many PCs are affected, fix the cause instead of rolling each one back: revert the commit on `main` and let the pipeline publish a new `stable`. Open an issue describing what broke either way.
+
+## Remote access with Tailscale (for future admins)
+
+> **Untested.** This is general Tailscale guidance; none of it has been verified on a NECD OS machine yet.
+
+Tailscale is how an admin reaches a clinic PC without opening ports on the clinic network. Confirm it is present on the image with `rpm -q tailscale` and `systemctl status tailscaled` before relying on it; if it isn't, add it in `build_files/build.sh` and a build-time check, not by hand.
+
+- **Join a machine:** `sudo tailscale up --ssh --hostname=necd-<room-or-name>`, then approve the login in the browser. For unattended setup, generate a **reusable, tagged auth key** in the Tailscale admin console and paste it on the machine. Never commit keys to this repo or bake them into the image.
+- **Tag clinic PCs** (for example `tag:necd-clinic`) so their node keys don't expire and access is governed by ACLs, not by whichever person logged in. Keep admin devices on a separate tag and only allow admin → clinic SSH.
+- **SSH:** with `--ssh`, use `tailscale ssh <hostname>`; no keys to distribute. Restrict who may do this in the tailnet's ACL.
+- **Persistence:** Tailscale state lives in `/var/lib/tailscale`, so it survives updates and rollbacks. `ujust powerwash` only erases `/var/home`, so the machine stays on the tailnet. To remove a retired PC, delete it in the Tailscale admin console, and run `sudo tailscale logout` first if you can.
+- **Debugging:** `tailscale status`, `tailscale netcheck`, `sudo journalctl -u tailscaled`.
+- **Ownership:** keep at least two admins on the tailnet, and record who owns the Tailscale account and its auth-key rotation in the project docs so access isn't lost with one person.
+- NordVPN (from `ujust kevcops`) can conflict with Tailscale routing. Keep it off clinic machines.
 
 ## Incremental roadmap
 

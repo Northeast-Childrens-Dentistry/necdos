@@ -12,6 +12,17 @@ Keep a small customization layer on Aurora stable using the Universal Blue image
 
 The planned pipeline checks upstream stable image digests daily, rebuilds on base/configuration changes, records provenance, validates/signs candidates and promotes only successful builds. Clients stage NECD image updates automatically and activate them at normal reboot. A failed build retains the last working release. Rollback, stale-build monitoring and a durable scheduled trigger are implementation requirements.
 
+## System requirements
+
+NECD OS inherits [Aurora's requirements](https://docs.getaurora.dev/guides/system-requirements):
+
+- x86_64 (Intel/AMD) CPU, 2 GHz quad core or better
+- UEFI firmware (CSM/Legacy boot will not work)
+- 4 GB RAM minimum, 8 GB or more recommended
+- SSD with at least 40 GB free for updates (an HDD works but updates are slow)
+
+The pilot PC (Intel Core i3-7100, 8 GB RAM) is below the CPU baseline and its UEFI and SSD status is unconfirmed; see [#1](https://github.com/Northeast-Childrens-Dentistry/necdos/issues/1).
+
 ## Shared workstation requirements
 
 - Google Chrome installed and default; Firefox and Brave installed options.

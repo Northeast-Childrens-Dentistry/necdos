@@ -18,7 +18,7 @@ for (let i = 0; i < allPanels.length; ++i) {
                 "applications:necd-carestack.desktop",
                 "applications:necd-iris.desktop",
                 "preferred://filemanager",
-                "applications:io.github.kolunmi.Bazaar.desktop"
+                "applications:org.kde.discover.desktop"
             ]);
             widget.reloadConfig();
         }

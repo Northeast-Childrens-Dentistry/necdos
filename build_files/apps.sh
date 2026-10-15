@@ -54,6 +54,20 @@ done
 grep -q 'applications:necd-carestack.desktop' /usr/share/plasma/look-and-feel/dev.getaurora.aurora.desktop/contents/layouts/org.kde.plasma.desktop-layout.js || fail "taskbar layout"
 grep -qx 'BrowserApplication=google-chrome.desktop' /etc/xdg/kdeglobals || fail "BrowserApplication"
 
+# --- Software store: Discover instead of Aurora's Bazaar ---
+# Aurora removes plasma-discover; NECD OS wants the simpler store. Flatpak backend only: OS updates
+# come from the image, so no rpm-ostree/PackageKit update backends.
+dnf5 install -y --setopt=install_weak_deps=False plasma-discover plasma-discover-libs plasma-discover-flatpak
+# Aurora removes the appstream KRunner plugin (KDE bug 523540); keep it removed.
+rm -f /usr/lib64/qt6/plugins/kf6/krunner/krunner_appstream.so
+# Do not install Bazaar for new users; open .flatpakref files with Discover.
+rm -f /usr/share/flatpak/preinstall.d/bazaar.preinstall
+XDG_CONFIG_HOME=/usr/share/applications xdg-mime default org.kde.discover.desktop application/vnd.flatpak.ref
+[[ -f /usr/share/applications/org.kde.discover.desktop ]] || fail "discover desktop file"
+[[ ! -e /usr/share/flatpak/preinstall.d/bazaar.preinstall ]] || fail "bazaar preinstall still present"
+grep -qx 'application/vnd.flatpak.ref=org.kde.discover.desktop' /usr/share/applications/mimeapps.list || fail "flatpakref default"
+grep -q 'applications:org.kde.discover.desktop' /usr/share/plasma/look-and-feel/dev.getaurora.aurora.desktop/contents/layouts/org.kde.plasma.desktop-layout.js || fail "taskbar discover pin"
+
 # --- Sunshine (game-streaming host) is not wanted on NECD OS ---
 dnf5 -y remove Sunshine
 rm -f /usr/lib/systemd/user-preset/89-aurora-sunshine.preset

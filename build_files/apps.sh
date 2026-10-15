@@ -42,6 +42,7 @@ done
 [[ -x /usr/lib/opt/google/chrome/google-chrome ]] || fail "chrome binary"
 [[ -s /etc/opt/chrome/policies/managed/necd.json ]] || fail "chrome managed policy"
 [[ -x /usr/libexec/necd/set-defaults ]] || fail "set-defaults script"
+[[ -e "/etc/skel/.config/google-chrome/First Run" ]] || fail "chrome first-run sentinel in /etc/skel"
 [[ -f /usr/share/ublue-os/user-setup.hooks.d/50-necd-defaults.sh ]] || fail "first-login defaults hook"
 # Dangling until boot: the target is /opt/google (tmpfiles relinks it), so test the link, not what it points to.
 [[ -L /usr/bin/google-chrome ]] || fail "/usr/bin/google-chrome"

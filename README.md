@@ -53,6 +53,10 @@ Board workflow: Backlog → Ready → In Progress → Validation → Done; Block
 
 Start with manifest/pilot hardware reconciliation (#1) and minimal trusted Aurora build (#3), then update automation (#4). Work is complete only after relevant validation passes.
 
+## Documentation
+
+[NECD OS docs](https://northeast-childrens-dentistry.github.io/necdos-docs/) are rebuilt daily from the Aurora docs ([necdos-docs](https://github.com/Northeast-Childrens-Dentistry/necdos-docs)). Staff open them from **NECD OS Help** in the app menu.
+
 ## Upstream references
 
 - [Aurora](https://github.com/ublue-os/aurora) and [documentation](https://docs.getaurora.dev/)

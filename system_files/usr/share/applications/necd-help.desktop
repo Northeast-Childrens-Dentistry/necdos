@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=NECD OS Help
+Comment=NECD OS documentation
+Exec=xdg-open https://northeast-childrens-dentistry.github.io/necdos-docs/
+Icon=/usr/share/necdos/branding/logo.svg
+Terminal=false
+Categories=Utility;
+StartupNotify=true

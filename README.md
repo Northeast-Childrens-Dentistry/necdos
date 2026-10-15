@@ -2,7 +2,7 @@
 
 An Aurora-based workstation image for Northeast Children’s Dentistry and a precursor to CarestackOS.
 
-**Status: planning and template scaffolding. No validated NECD OS release is available yet.** The copied template build configuration has not yet been converted to Aurora or configured for signed NECD releases.
+**Status: foundation candidate, not ready for practice rollout.** Signed `candidate` images build from Aurora stable and have booted to KDE in a VM (issue #3). Shared apps, fonts, Waydroid, personal tooling and pilot-hardware testing are still open.
 
 [Project board](https://github.com/orgs/Northeast-Childrens-Dentistry/projects/2) · [Implementation issues](https://github.com/Northeast-Childrens-Dentistry/necdos/issues)
 
@@ -31,6 +31,25 @@ The planned pipeline checks upstream stable image digests daily, rebuilds on bas
 
 Full DX and host VPN integration may require deployment/reboot transitions. Resolve these in issues #9–10 before promising immediate toggles. Shared fonts/apps remain after personal cleanup.
 
+## Custom `ujust` commands
+
+NECD OS keeps Aurora's `ujust` commands (`ujust --choose` lists them) except where noted. Overrides live in `system_files/usr/share/ublue-os/just/00-entry.just`.
+
+| Command | Status | What it does |
+| --- | --- | --- |
+| `ujust devmode` / `toggle-devmode` | **disabled** | Upstream would rebase to a developer image; prints a notice instead |
+| `ujust rebase-helper` (aliases `switch-stream`, `rollback-helper`) | **disabled** | Upstream can switch to any Universal Blue image; prints a notice instead |
+| `ujust changelogs` | **disabled** | Upstream shows Aurora's release notes; `ujust changelogs-fedora` still works |
+| `ujust aurora-cli`, `aurora-fonts`, `toggle-dinosaurs` | **hidden** | Aurora-specific extras |
+| `ujust kevcops` / `removekevcops` | planned (#10) | Apply / manually reverse the personal setup |
+| `ujust setup-<office>` | planned (#14) | Apply an office profile (printers, scanners) from a private repo |
+
+Not changed and worth knowing: `ujust powerwash` (experimental factory reset) is still available.
+
+## Branding
+
+All branded files, the commands that regenerate them, and what must stay upstream are listed in [docs/BRANDING.md](docs/BRANDING.md). It is written so a person or an AI agent can rebrand the image (for example to CarestackOS, or for another organization) in one pass.
+
 ## Incremental roadmap
 
 | Step | Issue |
@@ -52,6 +71,8 @@ Full DX and host VPN integration may require deployment/reboot transitions. Reso
 Board workflow: Backlog → Ready → In Progress → Validation → Done; Blocked for unresolved requirements/access/architecture. Issue bodies contain phase, priority, variant, dependencies, task checklists and acceptance criteria.
 
 Start with manifest/pilot hardware reconciliation (#1) and minimal trusted Aurora build (#3), then update automation (#4). Work is complete only after relevant validation passes.
+
+NECD OS is built on [Aurora](https://github.com/ublue-os/aurora) from the Universal Blue project; Aurora's licenses and credits remain in the image.
 
 ## Upstream references
 

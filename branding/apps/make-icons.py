@@ -25,19 +25,29 @@ cs.putalpha(m.resize((1200, 1200), Image.LANCZOS))
 for s in SIZES:
     save(cs, s, "necd-carestack")
 
-# Iris: opaque white background -> alpha (un-blend teal from white), then trace the
-# flat one-colour art to SVG with potrace and render every PNG from the SVG (no upscaling blur).
+# Iris: teal art on an opaque white square. The outside of the bubble becomes transparent, the
+# inside of the bubble stays WHITE (so the text stays readable on any panel). Trace two flat shapes
+# with potrace: the white silhouette (ring + interior) underneath, the teal art on top. Every PNG is
+# rendered from the SVG (no upscaling blur).
 iris = Image.open(HERE / "iris-source.png").convert("RGB")
 alpha = iris.split()[0].point(lambda v: max(0, min(255, round((255 - v) * 255 / (255 - TEAL[0])))))
 big = alpha.resize((alpha.width * 8, alpha.height * 8), Image.LANCZOS).point(lambda v: 255 if v > 127 else 0)
 w, h = alpha.size
-with tempfile.TemporaryDirectory() as t:
-    pbm = Path(t) / "i.pbm"; big.point(lambda v: 0 if v else 255).convert("1").save(pbm)
-    subprocess.run(["potrace", "-s", "-o", t + "/i.svg", "--flat", str(pbm)], check=True)
-    body = (Path(t) / "i.svg").read_text()
-paths = body[body.index("<g"):body.index("</svg>")]
+outside = big.copy()
+ImageDraw.floodfill(outside, (0, 0), 128, thresh=0)          # exterior background only
+silhouette = outside.point(lambda v: 0 if v == 128 else 255)  # teal + enclosed interior
+
+def trace(mask):
+    with tempfile.TemporaryDirectory() as t:
+        pbm = Path(t) / "i.pbm"; mask.point(lambda v: 0 if v else 255).convert("1").save(pbm)
+        subprocess.run(["potrace", "-s", "-o", t + "/i.svg", "--flat", str(pbm)], check=True)
+        body = (Path(t) / "i.svg").read_text()
+    return body[body.index("<g"):body.index("</svg>")]
+
+white = trace(silhouette).replace('fill="#000000"', 'fill="#ffffff"')
+teal = trace(big).replace('fill="#000000"', 'fill="#%02x%02x%02x"' % TEAL)
 svg = (f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w*8} {h*8}">'
-       + paths.replace('fill="#000000"', 'fill="#%02x%02x%02x"' % TEAL) + "</svg>")
+       + white + teal + "</svg>")
 (ICONS / "scalable/apps/necd-iris.svg").write_text(svg)
 for s in SIZES:
     d = ICONS / f"{s}x{s}/apps"; d.mkdir(parents=True, exist_ok=True)

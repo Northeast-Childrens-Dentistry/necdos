@@ -10,7 +10,31 @@ An Aurora-based workstation image for Northeast Children’s Dentistry and a pre
 
 Keep a small customization layer on Aurora stable using the Universal Blue image template. No full Aurora fork or routine upstream source merges. Standard and, if needed for reversible personal tooling, DX variants share the same NECD layer.
 
-The planned pipeline checks upstream stable image digests daily, rebuilds on base/configuration changes, records provenance, validates/signs candidates and promotes only successful builds. Clients stage NECD image updates automatically and activate them at normal reboot. A failed build retains the last working release. Rollback, stale-build monitoring and a durable scheduled trigger are implementation requirements.
+### How updates reach the clinic
+
+| Tag | What it is | Who uses it |
+| --- | --- | --- |
+| `stable` | Last image that passed every check | Clinic PCs |
+| `stable-<YYYYMMDD>` | Each promoted stable | Rollback points |
+| `testing-*` | A `main` build before checks finish | Nobody |
+| `candidate-*` | Feature work dispatched from a branch | Admin testing (VM, USB) |
+
+- The Aurora base is pinned by digest in `Containerfile`. Renovate proposes a new digest 5 days after Aurora publishes it and merges it if the PR build passes.
+- Every push to `main` builds `testing`, signs it, verifies the signature, boot-tests it in a VM, then retags the same digest as `stable`. Any failure leaves `stable` unchanged.
+- Run a rebuild by hand: `gh workflow run build.yml --ref main`. Publish a candidate: `gh workflow run build.yml --ref <branch>` and approve the `candidate` deployment.
+- Failures open an `update-failure` issue; `stable` lagging Aurora by 14 days past the soak opens `update-stale`; healthchecks.io emails if the daily heartbeat stops.
+- The package is public and needs no client token. Clients only install images signed with `cosign.pub`. Never put a secret in the image.
+
+### Clients, reboots and rollback
+
+- Updates stage in the background and activate at the next boot. At 02:00 a PC reboots into a staged update **only if nobody is logged in**; a session left logged in overnight delays it to the next manual restart. Opt a PC out: `sudo systemctl disable --now necd-update-reboot.timer`.
+- Staff: if something is wrong after a restart, call the administrator.
+- Admin, previous image: `sudo bootc rollback && sudo reboot`.
+- Admin, a specific older image: `sudo bootc switch --enforce-container-sigpolicy ghcr.io/northeast-childrens-dentistry/necdos:stable-<YYYYMMDD> && sudo reboot`. Return with the same command and `:stable`.
+
+### Signing key rotation (only if the key may have leaked)
+
+Done with the admin step by step: generate a new pair; ship both public keys in the image (policy.json lists both) for one release; switch the `release`/`candidate` secrets to the new key; once all clients run that release, remove the old public key.
 
 ## System requirements
 

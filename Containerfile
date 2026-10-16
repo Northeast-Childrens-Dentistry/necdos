@@ -1,10 +1,16 @@
+# Aurora stable pinned by digest; Renovate bumps it after a 5-day soak.
+ARG BASE_IMAGE=ghcr.io/ublue-os/aurora:stable@sha256:ff8e14da269425529995a1dac043116246869d37b1233195068a68627dca1f6a
+
 # Allow build scripts to be referenced without being copied into the final image
 FROM scratch AS ctx
 COPY build_files /
 COPY system_files /system_files
 
 # Base Image
-FROM ghcr.io/ublue-os/aurora:stable
+FROM ${BASE_IMAGE}
+ARG BASE_IMAGE
+ARG IMAGE_TAG=candidate
+LABEL io.necdos.base-image="${BASE_IMAGE}"
 ## NECD OS foundation: inherit Aurora stable without rebasing to Bazzite.
 # Developer variant and additional applications are separate roadmap tasks.
 # 

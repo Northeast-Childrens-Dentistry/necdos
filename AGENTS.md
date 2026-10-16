@@ -11,21 +11,16 @@ Read the issue before you start, and add a comment whenever the state changes.
 - Leave other sessions' uncommitted changes alone.
 
 ## Don't disturb a build someone is testing
-Check `gh run list --limit 5` first. The rules below are from `.github/workflows/build.yml` on `main` (October 2026).
+Check `gh run list --limit 5` first. The rules below are from `.github/workflows/build.yml` on `main` (October 2026, after #4 merged).
 
 | Action | Effect |
 |---|---|
 | Open or update a PR | Safe. Builds and lints only, never pushes or signs, and runs in its own concurrency group. |
-| Merge to `main` | Doesn't start a build by itself today. |
-| `workflow_dispatch` on `main` | **Cancels a `main` build already in progress** (`cancel-in-progress: true`), then publishes and signs the `candidate` tags. |
-| `workflow_dispatch` on a branch | Builds without publishing. |
+| Merge to `main` (code, not just `*.md`/`docs/`) | **Starts a build** that pushes `testing-*`, signs, boot-tests, then promotes to `stable`. Clinic PCs and any VM following `stable` will update to it. |
+| Several runs on `main` | They queue (`cancel-in-progress` only for PRs); promotions are serialized. |
+| `workflow_dispatch` on `main` or a branch | Builds, signs and publishes `candidate*` tags. Doesn't touch `stable`. |
 
-When `feat/auto-updates` (#4) merges, these rules change:
-- A push to `main` builds `testing` and, if checks pass, promotes it to `stable`. That changes what clinic PCs and any VM following those tags will update to.
-- Runs on `main` queue instead of cancelling each other.
-- Dispatching from a branch publishes `candidate-*` tags.
-
-Whoever merges #4 updates this table. When unsure: open a PR and don't merge or dispatch until the user says their test is finished.
+When unsure: open a PR and don't merge or dispatch until the user says their test is finished. Merging is now a release.
 
 ## Where things go
 - KDE/Plasma defaults for all users go in `system_files/usr/share/kde-settings/kde-profile/default/xdg/`. A user's own `~/.config` copy takes precedence over these, so existing users may not get a change.

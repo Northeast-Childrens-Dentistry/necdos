@@ -1,0 +1,30 @@
+---
+name: Update heartbeat
+on:
+  schedule:
+    - cron: "23 13 * * *"  # daily, morning US Eastern
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  heartbeat:
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Check stable is keeping up with Aurora
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          command -v skopeo || { sudo apt-get update && sudo apt-get install -y skopeo; }
+          bash .github/scripts/heartbeat-stale.sh
+
+      - name: Ping healthchecks.io
+        env:
+          HC_PING_URL: ${{ secrets.HC_PING_URL }}
+        run: curl -fsS -m 10 --retry 5 "$HC_PING_URL"

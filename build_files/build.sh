@@ -14,7 +14,7 @@ rm -f /usr/share/backgrounds/default.jxl /usr/share/backgrounds/default-dark.jxl
 
 cp -avf /ctx/system_files/. /
 bash /ctx/apps.sh
-
+systemctl enable necd-update-reboot.timer
 
 ### Identity: rename the OS and cut Aurora's own links. ID/VARIANT_ID/IMAGE_ID stay "aurora" for now
 ### because upstream tooling keys on them; change only after testing in a VM.
@@ -28,9 +28,9 @@ sed -i -E '/^(HOME_URL|DOCUMENTATION_URL|SUPPORT_URL|BUG_REPORT_URL|VERSION_CODE
 
 # image-info.json drives ujust rebase helpers, the MOTD and the signed-image indicator.
 IMG=/usr/share/ublue-os/image-info.json
-jq '."image-name"="necdos" | ."image-vendor"="northeast-childrens-dentistry"
+jq --arg tag "$IMAGE_TAG" '."image-name"="necdos" | ."image-vendor"="northeast-childrens-dentistry"
     | ."image-ref"="ostree-image-signed:docker://ghcr.io/northeast-childrens-dentistry/necdos"
-    | ."image-tag"="candidate"' "$IMG" > /tmp/image-info.json
+    | ."image-tag"=$tag' "$IMG" > /tmp/image-info.json
 cp -f /tmp/image-info.json "$IMG"
 
 # Remove Aurora's docs/discussion launchers, offline docs, and unused tips.
@@ -77,15 +77,10 @@ cp -f --remove-destination $B/wordmark.svg /usr/share/pixmaps/aurora-banner.svg
 cp -f --remove-destination $B/system-logo.png /usr/share/pixmaps/system-logo.png
 cp -f --remove-destination $B/system-logo-white.png /usr/share/pixmaps/system-logo-white.png
 install -d -m 0755 /usr/share/necdos
-cat > /usr/share/necdos/release.json <<'JSON'
-{
-  "name": "NECD OS",
-  "stage": "foundation",
-  "base": "ghcr.io/ublue-os/aurora:stable",
-  "ready_for_practice": false,
-  "requirements": "https://github.com/Northeast-Childrens-Dentistry/necdos/blob/main/docs/requirements.md"
-}
-JSON
+jq -n --arg base "$BASE_IMAGE" '{name: "NECD OS", stage: "foundation", base: $base,
+  ready_for_practice: false,
+  requirements: "https://github.com/Northeast-Childrens-Dentistry/necdos/blob/main/docs/requirements.md"}' \
+  > /usr/share/necdos/release.json
 chmod 0644 /usr/share/necdos/release.json
 
 # Approved app provisioning, fonts and personal setup are subsequent tasks.
@@ -97,6 +92,13 @@ test "$(jq -r '."image-name"' /usr/share/ublue-os/image-info.json)" = necdos
 jq -e '.transports.docker["ghcr.io/northeast-childrens-dentistry/necdos"][0].type == "sigstoreSigned"' /etc/containers/policy.json >/dev/null
 test -s /etc/pki/containers/necd.pub
 ujust toggle-devmode | grep -q "not available on NECD OS"
+[[ "$BASE_IMAGE" == ghcr.io/ublue-os/aurora:stable@sha256:* ]] || { echo "base not pinned: $BASE_IMAGE" >&2; exit 1; }
+test "$(jq -r .base /usr/share/necdos/release.json)" = "$BASE_IMAGE"
+test "$(jq -r '."image-tag"' /usr/share/ublue-os/image-info.json)" = "$IMAGE_TAG"
+test -e /usr/lib/systemd/system/uupd.timer   # Aurora's updater stages the updates this timer activates
+test -L /etc/systemd/system/timers.target.wants/necd-update-reboot.timer
+if grep -q '^Persistent=' /usr/lib/systemd/system/necd-update-reboot.timer; then exit 1; fi   # `! grep` would not fail under set -e
+test -x /usr/libexec/necd-update-reboot
 
 # Fail the build if branding did not land.
 for f in /usr/share/wallpapers/Aurora/contents/images/3840x2160.jxl \

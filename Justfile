@@ -99,6 +99,8 @@ build $target_image=image_name $tag=default_tag:
     set -euox pipefail
 
     BUILD_ARGS=()
+    # main builds are pushed as testing and promoted to stable unchanged, so they carry the stable name.
+    BUILD_ARGS+=("--build-arg" "IMAGE_TAG=${tag/testing/stable}")
     LABELS=()
     if [[ -z "$(git status -s)" ]]; then
         GIT_SHA=$(git rev-parse --short HEAD)

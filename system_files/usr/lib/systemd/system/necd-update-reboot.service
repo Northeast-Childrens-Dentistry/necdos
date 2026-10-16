@@ -1,0 +1,6 @@
+[Unit]
+Description=Reboot into a staged NECD OS update if nobody is logged in
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/necd-update-reboot

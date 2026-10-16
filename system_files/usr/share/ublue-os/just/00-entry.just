@@ -53,6 +53,34 @@ powerwash:
     sudo bootc install reset --experimental
     echo "Reset prepared. Restart the computer to finish."
 
+# Install Microsoft's Arial and Times New Roman on this computer (downloads them; administrators only)
+install-ms-fonts:
+    #!/usr/bin/bash
+    set -eu
+    if ! id -nG | tr ' ' '\n' | grep -qx wheel; then
+        echo "Only an administrator can install fonts. Ask your administrator."
+        exit 1
+    fi
+    # Microsoft's license allows downloading these but not redistributing them, so they are
+    # fetched onto this computer and never shipped in the NECD OS image.
+    base="https://downloads.sourceforge.net/project/corefonts/the%20fonts/final"
+    work=$(mktemp -d)
+    trap 'rm -rf "$work"' EXIT
+    cd "$work"
+    curl -fSL -o arial32.exe "$base/arial32.exe"
+    curl -fSL -o times32.exe "$base/times32.exe"
+    sha256sum -c - <<SUMS
+    85297a4d146e9c87ac6f74822734bdee5f4b2a722d7eaa584b7f2cbf76f478f6  arial32.exe
+    db56595ec6ef5d3de5c24994f001f03b2a13e37cee27bc25c58f6f43e8f807ab  times32.exe
+    SUMS
+    cabextract -q -L -F '*.ttf' arial32.exe times32.exe
+    sudo install -d /usr/local/share/fonts/necd-ms
+    sudo install -m 0644 ./*.ttf /usr/local/share/fonts/necd-ms/
+    sudo fc-cache -f /usr/local/share/fonts/necd-ms
+    fc-match Arial | grep -qi '^arial' || { echo "Arial was not picked up by the font system."; exit 1; }
+    fc-match "Times New Roman" | grep -qi '^times' || { echo "Times New Roman was not picked up by the font system."; exit 1; }
+    echo "Installed Arial and Times New Roman. Restart open apps to see them."
+
 [private]
 aurora-cli:
     #!/usr/bin/bash
@@ -65,6 +93,11 @@ aurora-fonts:
 
 [private]
 toggle-dinosaurs hemisphere="north":
+    #!/usr/bin/bash
+    echo "Not available."
+
+[private]
+setup-sunshine ACTION="":
     #!/usr/bin/bash
     echo "Not available."
 

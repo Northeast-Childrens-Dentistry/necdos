@@ -251,7 +251,9 @@ jobs:
           if ! grep -q 'Reached target.*Graphical Interface' serial.log; then
             tail -n 100 serial.log; echo "::error::VM did not reach the desktop in 15 minutes"; exit 1
           fi
-          if grep 'Failed to start' serial.log; then
+          # bootloader-update (bootupd) has no EFI partition to update in this BIOS-booted CI VM;
+          # it is checked on a real UEFI install instead.
+          if grep 'Failed to start' serial.log | grep -v 'bootloader-update'; then
             echo "::error::units failed during boot"; exit 1
           fi
 

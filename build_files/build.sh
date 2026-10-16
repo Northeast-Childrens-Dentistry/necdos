@@ -100,7 +100,7 @@ ujust toggle-devmode | grep -q "not available on NECD OS"
 
 # Fail the build if branding did not land.
 for f in /usr/share/wallpapers/Aurora/contents/images/3840x2160.jxl \
-         /usr/share/wallpapers/NECD-Kids-on-Toothpaste/contents/images/1920x1080.png \
+         /usr/share/wallpapers/NECD-Doodle-Cream/contents/images/1920x1080.png \
          /usr/share/wallpapers/NECD-Logo-Multicolor/contents/images/1920x1080.png \
          /usr/share/backgrounds/default.jxl \
          /usr/share/plasma/plasma-welcome/intro-customization.desktop \
@@ -108,7 +108,7 @@ for f in /usr/share/wallpapers/Aurora/contents/images/3840x2160.jxl \
          /usr/share/necdos/branding/logo.svg; do
   test -s "$f" || { echo "missing $f" >&2; exit 1; }
 done
-grep -q NECD-Kids-on-Toothpaste /usr/share/plasma/look-and-feel/dev.getaurora.aurora.desktop/contents/plasmoidsetupscripts/org.kde.plasma.folder.js
+grep -q NECD-Doodle-Cream /usr/share/plasma/look-and-feel/dev.getaurora.aurora.desktop/contents/plasmoidsetupscripts/org.kde.plasma.folder.js
 grep -qx "Name=Files" /usr/share/applications/org.kde.dolphin.desktop
 K=/usr/share/kde-settings/kde-profile/default/xdg/kglobalshortcutsrc
 grep -qx 'Log Out=Ctrl+Shift+Esc,Ctrl+Shift+Esc,Show Logout Screen' "$K"

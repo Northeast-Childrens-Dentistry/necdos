@@ -86,3 +86,22 @@ if rpm -q Sunshine >/dev/null 2>&1; then fail "Sunshine still installed"; fi
 dnf5 install -y --setopt=install_weak_deps=False cabextract
 command -v cabextract >/dev/null || fail "cabextract"
 ujust --summary | tr ' ' '\n' | grep -qx install-ms-fonts || fail "install-ms-fonts recipe"
+
+# --- PdfCraft (https://github.com/storytold/pdfcraft): not on Flathub, so the pinned release RPM ---
+# Bump both lines together; the hash is from that release's SHA256SUMS.txt.
+PDFCRAFT_VER=0.8.0
+PDFCRAFT_SHA=5b7f041ec67f54c81171568ceb5396eb2a826e6e61371a58e7299752f8491c20
+curl -fsSLo /tmp/pdfcraft.rpm "https://github.com/storytold/pdfcraft/releases/download/v$PDFCRAFT_VER/pdfcraft-$PDFCRAFT_VER-linux-x86_64.rpm"
+echo "$PDFCRAFT_SHA  /tmp/pdfcraft.rpm" | sha256sum -c -
+dnf5 install -y /tmp/pdfcraft.rpm
+rm -f /tmp/pdfcraft.rpm
+# PdfCraft also claims PDFs; keep Okular the default for both the generic and KDE lists.
+XDG_CONFIG_HOME=/usr/share/applications xdg-mime default okularApplication_pdf.desktop application/pdf
+sed -i -e '/^application\/pdf=/d' -e '/^\[Default Applications\]/a application/pdf=okularApplication_pdf.desktop' \
+    /usr/share/applications/kde-mimeapps.list
+command -v pdfcraft >/dev/null || fail "pdfcraft binary"
+[[ -f /usr/share/applications/ai.storyteller.pdfcraft.desktop ]] || fail "pdfcraft desktop file"
+[[ -f /usr/share/applications/okularApplication_pdf.desktop ]] || fail "okular pdf desktop file"
+for l in mimeapps.list kde-mimeapps.list; do
+    grep -qx 'application/pdf=okularApplication_pdf.desktop' "/usr/share/applications/$l" || fail "okular pdf default in $l"
+done

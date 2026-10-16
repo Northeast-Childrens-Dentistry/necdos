@@ -4,3 +4,7 @@ Log Out=Ctrl+Shift+Esc,Ctrl+Shift+Esc,Show Logout Screen
 
 [services][org.kde.plasma-systemmonitor.desktop]
 _launch=Ctrl+Alt+Del\tMeta+Esc
+
+# Windows-style Win+Shift+S: Spectacle region capture (Spectacle's own Meta+Shift+Print kept).
+[services][org.kde.spectacle.desktop]
+RectangularRegionScreenShot=Meta+Shift+S\tMeta+Shift+Print

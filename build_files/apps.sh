@@ -86,3 +86,7 @@ if rpm -q Sunshine >/dev/null 2>&1; then fail "Sunshine still installed"; fi
 dnf5 install -y --setopt=install_weak_deps=False cabextract
 command -v cabextract >/dev/null || fail "cabextract"
 ujust --summary | tr ' ' '\n' | grep -qx install-ms-fonts || fail "install-ms-fonts recipe"
+
+# --- Calculator (KCalc; renamed to "Calculator" in build.sh) ---
+dnf5 install -y --setopt=install_weak_deps=False kcalc
+[[ -f /usr/share/applications/org.kde.kcalc.desktop ]] || fail "kcalc desktop file"

@@ -118,3 +118,5 @@ K=/usr/share/kde-settings/kde-profile/default/xdg/kglobalshortcutsrc
 grep -qx 'Log Out=Ctrl+Shift+Esc,Ctrl+Shift+Esc,Show Logout Screen' "$K"
 grep -qx '_launch=Ctrl+Alt+Del\\tMeta+Esc' "$K"
 test -e /usr/share/applications/org.kde.plasma-systemmonitor.desktop
+grep -qx 'RectangularRegionScreenShot=Meta+Shift+S\\tMeta+Shift+Print' "$K"
+test -e /usr/share/applications/org.kde.spectacle.desktop

@@ -1,5 +1,7 @@
 [customizations.installer.kickstart]
 contents = """
+lang en_US.UTF-8
+keyboard --vckeymap=us --xlayouts='us'
 %post
 bootc switch --mutate-in-place --enforce-container-sigpolicy --transport registry ghcr.io/northeast-childrens-dentistry/necdos:stable
 %end
@@ -13,7 +15,8 @@ enable = [
   "org.fedoraproject.Anaconda.Modules.Security",
   "org.fedoraproject.Anaconda.Modules.Services",
   "org.fedoraproject.Anaconda.Modules.Users",
-  "org.fedoraproject.Anaconda.Modules.Timezone"
+  "org.fedoraproject.Anaconda.Modules.Timezone",
+  "org.fedoraproject.Anaconda.Modules.Localization"
 ]
 
 disable = [

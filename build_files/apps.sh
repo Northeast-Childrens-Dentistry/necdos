@@ -86,3 +86,11 @@ if rpm -q Sunshine >/dev/null 2>&1; then fail "Sunshine still installed"; fi
 dnf5 install -y --setopt=install_weak_deps=False cabextract
 command -v cabextract >/dev/null || fail "cabextract"
 ujust --summary | tr ' ' '\n' | grep -qx install-ms-fonts || fail "install-ms-fonts recipe"
+
+# --- KDE apps Aurora only offers through `ujust install-system-flatpaks`, which nothing here runs ---
+# RPMs, so they need no network at first boot. KCalc is renamed to "Calculator" in build.sh.
+dnf5 install -y --setopt=install_weak_deps=False okular gwenview kcalc haruna skanpage kclock kweather kontact qrca
+for d in okularApplication_pdf org.kde.okular org.kde.gwenview org.kde.kcalc org.kde.haruna org.kde.skanpage \
+         org.kde.kclock org.kde.kweather org.kde.kontact org.kde.qrca; do
+    [[ -f /usr/share/applications/$d.desktop ]] || fail "$d desktop file"
+done

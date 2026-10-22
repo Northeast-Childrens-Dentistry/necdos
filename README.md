@@ -138,6 +138,25 @@ Tailscale is how an admin reaches a clinic PC without opening ports on the clini
 - **Ownership:** keep at least two admins on the tailnet, and record who owns the Tailscale account and its auth-key rotation in the project docs so access isn't lost with one person.
 - NordVPN (from `ujust kevcops`) can conflict with Tailscale routing. Keep it off clinic machines.
 
+## Custom `ujust` commands
+
+NECD OS keeps Aurora's `ujust` commands (`ujust --choose` lists them) except where noted. Overrides live in `system_files/usr/share/ublue-os/just/00-entry.just`.
+
+| Command | Status | What it does |
+| --- | --- | --- |
+| `ujust devmode` / `toggle-devmode` | **disabled** | Upstream would rebase to a developer image; prints a notice instead |
+| `ujust rebase-helper` (aliases `switch-stream`, `rollback-helper`) | **disabled** | Upstream can switch to any Universal Blue image; prints a notice instead |
+| `ujust changelogs` | **disabled** | Upstream shows Aurora's release notes; `ujust changelogs-fedora` still works |
+| `ujust aurora-cli`, `aurora-fonts`, `toggle-dinosaurs` | **hidden** | Aurora-specific extras |
+| `ujust kevcops` / `removekevcops` | planned (#10) | Apply / manually reverse the personal setup |
+| `ujust setup-<office>` | planned (#14) | Apply an office profile (printers, scanners) from a private repo |
+
+Not changed and worth knowing: `ujust powerwash` (experimental factory reset) is still available.
+
+## Branding
+
+All branded files, the commands that regenerate them, and what must stay upstream are listed in [docs/BRANDING.md](docs/BRANDING.md). It is written so a person or an AI agent can rebrand the image (for example to CarestackOS, or for another organization) in one pass.
+
 ## Incremental roadmap
 
 | Step | Issue |
@@ -163,6 +182,8 @@ Start with manifest/pilot hardware reconciliation (#1) and minimal trusted Auror
 ## Documentation
 
 [NECD OS docs](https://northeast-childrens-dentistry.github.io/necdos-docs/) are rebuilt daily from the Aurora docs ([necdos-docs](https://github.com/Northeast-Childrens-Dentistry/necdos-docs)). Staff open them from **NECD OS Help** in the app menu.
+
+NECD OS is built on [Aurora](https://github.com/ublue-os/aurora) from the Universal Blue project; Aurora's licenses and credits remain in the image.
 
 ## Upstream references
 

@@ -1,0 +1,12 @@
+{
+  "KPlugin": {
+    "Authors": [
+      {
+        "Name": "Northeast Children's Dentistry"
+      }
+    ],
+    "Id": "NECD-Doodle-Brown",
+    "Name": "NECD Doodle Brown",
+    "License": "Proprietary, all rights reserved"
+  }
+}

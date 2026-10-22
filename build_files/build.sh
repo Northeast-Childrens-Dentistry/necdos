@@ -52,6 +52,7 @@ rename_app org.kde.dolphin Dolphin "Files"
 rename_app org.kde.konsole Konsole "Terminal"
 rename_app org.kde.kate Kate "Text Editor"
 rename_app org.kde.ark Ark "Archive Manager"
+rename_app org.kde.kcalc KCalc "Calculator"
 
 ### Trust: require a valid NECD signature for the NECD image (cosign.pub), keeping upstream entries.
 python3 - <<'PY'

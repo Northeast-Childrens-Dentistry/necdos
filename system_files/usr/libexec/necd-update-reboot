@@ -12,7 +12,7 @@ if ! bootc status --format=json | jq -e '.status.staged != null' >/dev/null; the
     exit 0
 fi
 # Capture first so a loginctl failure stops the script (set -e) instead of looking like "no sessions".
-sessions=$(loginctl list-sessions -o json)
+sessions=$(loginctl list-sessions --json=short)
 if ! jq -e 'type == "array" and all(.[]; .class | startswith("user") | not)' <<<"$sessions" >/dev/null; then
     echo "Update staged, but a user is logged in (or sessions could not be read). Not rebooting."
     exit 0

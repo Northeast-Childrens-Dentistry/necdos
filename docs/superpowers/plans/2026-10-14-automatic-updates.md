@@ -335,7 +335,7 @@ if ! bootc status --format=json | jq -e '.status.staged != null' >/dev/null; the
     echo "No staged update."
     exit 0
 fi
-if loginctl list-sessions -o json | jq -e 'any(.[]; .class | startswith("user"))' >/dev/null; then
+if loginctl list-sessions --json=short | jq -e 'any(.[]; .class | startswith("user"))' >/dev/null; then
     echo "Update staged, but a user is logged in. Not rebooting."
     exit 0
 fi

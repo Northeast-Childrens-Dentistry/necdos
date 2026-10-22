@@ -100,6 +100,7 @@ test -e /usr/lib/systemd/system/uupd.timer   # Aurora's updater stages the updat
 test -L /etc/systemd/system/timers.target.wants/necd-update-reboot.timer
 if grep -q '^Persistent=' /usr/lib/systemd/system/necd-update-reboot.timer; then exit 1; fi   # `! grep` would not fail under set -e
 test -x /usr/libexec/necd-update-reboot
+grep -q -- "list-sessions --json=short" /usr/libexec/necd-update-reboot   # `-o json` prints a table, jq then fails and the nightly reboot never fires
 
 # Fail the build if branding did not land.
 for f in /usr/share/wallpapers/Aurora/contents/images/3840x2160.jxl \

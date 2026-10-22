@@ -2,7 +2,7 @@
 
 An Aurora-based workstation image for Northeast Children’s Dentistry and a precursor to CarestackOS.
 
-**Status: pilot build.** The image builds on Aurora stable, is signed, and includes the NECD app set (CareStack and Iris windows, Chrome defaults, shortcuts) and the fonts recipe. Automatic stable promotion and overnight updates ([#4](https://github.com/Northeast-Childrens-Dentistry/necdos/issues/4)) are not active yet, and it has not been validated for practice rollout.
+**Status: pilot build.** The image builds on Aurora stable, is signed, and includes the NECD app set (CareStack and Iris windows, Chrome defaults, shortcuts) and the fonts recipe. Automatic stable promotion and overnight updates ([#4](https://github.com/Northeast-Childrens-Dentistry/necdos/issues/4)) are live, but it has not been validated for practice rollout.
 
 [Project board](https://github.com/orgs/Northeast-Childrens-Dentistry/projects/2) · [Implementation issues](https://github.com/Northeast-Childrens-Dentistry/necdos/issues)
 
@@ -89,19 +89,17 @@ Check what a machine is running: `sudo bootc status` (booted, staged and rollbac
 
 ## How updates work
 
-> **Planned, not active yet.** The `stable`/`testing` promotion, dated `stable-YYYYMMDD` tags and overnight reboot below are the design in [#4](https://github.com/Northeast-Childrens-Dentistry/necdos/issues/4), which has not merged. Today only `candidate` tags (`candidate`, `candidate-YYYYMMDD`, `candidate-<sha>`) are published, and there is no `stable` tag.
-
 1. The build pipeline rebuilds when Aurora stable or this repo changes, then signs the image and publishes it as `ghcr.io/northeast-childrens-dentistry/necdos`.
 2. Only an image that passes the build, signature and boot checks is promoted to the `stable` tag. Clinic PCs follow `stable`. Dated tags `stable-YYYYMMDD` are kept as rollback points.
 3. Aurora's updater downloads the new image in the background and **stages** it. Nothing changes for the running session.
-4. The staged image takes effect at the next reboot. Planned: an overnight (02:00) reboot, only when nobody is logged in.
+4. The staged image takes effect at the next reboot. An overnight reboot (02:00 to 05:00) applies it, only when nobody is logged in.
 5. If a build fails, `stable` doesn't move and PCs stay on the last working release.
 
 Images are signature-checked by the client against `cosign.pub`; a tag that isn't signed by the NECD key won't be accepted.
 
 ## Rolling back
 
-> **Untested in a VM.** Rolling back to the previous image is standard bootc behavior, but these steps have not been verified on NECD OS. The `stable-YYYYMMDD` pinning part depends on [#4](https://github.com/Northeast-Childrens-Dentistry/necdos/issues/4) (planned, not active yet).
+> Upgrade and rollback (both directions) and the overnight reboot were tested in a Secure Boot VM ([#4](https://github.com/Northeast-Childrens-Dentistry/necdos/issues/4)). Not yet tried on real clinic hardware.
 
 Reboot into the previous image. Per-user data and settings are untouched.
 
